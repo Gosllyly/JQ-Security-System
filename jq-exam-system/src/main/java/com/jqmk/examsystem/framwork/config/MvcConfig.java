@@ -2,7 +2,6 @@ package com.jqmk.examsystem.framwork.config;
 
 import com.jqmk.examsystem.framwork.aop.JwtInterceptor;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -12,7 +11,6 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
  * @Date 2024/6/5 13:51
  * @Description
  */
-@Configuration
 public class MvcConfig implements WebMvcConfigurer {
 
     /**
@@ -24,6 +22,7 @@ public class MvcConfig implements WebMvcConfigurer {
         registry.addInterceptor(jwtInterceptor())
                 .addPathPatterns("/**")
                 .excludePathPatterns("/login/verify")
+                .excludePathPatterns("/register/verify")
                 .excludePathPatterns("/test/**");
     }
 
