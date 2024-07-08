@@ -2,8 +2,6 @@ package com.jqmk.examsystem.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
-
 /**
  * @ClassName ExamRecordDto
  * @Author tian
@@ -12,6 +10,8 @@ import java.time.LocalDateTime;
  */
 @Data
 public class ExamRecordDto {
+
+    private Integer id;
 
     private String username;
 
@@ -39,23 +39,27 @@ public class ExamRecordDto {
     /**
      * 答题错误数
      */
-    private Integer answerWrongs;
+    private Integer answerWrong;
     /**
      * 答题未作答
      */
     private Integer noReply;
     /**
-     * 答题未作答
+     * 分数
      */
     private Integer score;
     /**
      * 考试开始时间
      */
-    private LocalDateTime startTime;
+    private String startTime;
+    /**
+     * 用时
+     */
+    private String unavailable;
 
     /**
      * 考试完成时间
      */
-    private LocalDateTime endTime;
+    private String endTime;
 
 }

@@ -1,15 +1,14 @@
 package com.jqmk.examsystem.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -22,7 +21,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("test_paper")
+@TableName(value = "test_paper",autoResultMap = true)
 public class TestPaper implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -89,6 +88,11 @@ public class TestPaper implements Serializable {
      * 参加考试的人群id列表
      */
     private String examCrowdIds;
+    /**
+     * 参加考试的人群id列表
+     */
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<Integer> examCrowdId;
 
     /**
      * 考试开始时间

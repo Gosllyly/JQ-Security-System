@@ -3,16 +3,19 @@ package com.jqmk.examsystem.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jqmk.examsystem.dto.ExamCrowdManageDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.ExamCrowdManage;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.service.ExamCrowdManageService;
 import com.jqmk.examsystem.service.UserService;
+import com.jqmk.examsystem.utils.StringsUtil;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -40,21 +43,32 @@ public class ExamCrowdManageController {
     }
 
     @PostMapping("/add")
-    public WebResult addCrowdManage(@RequestBody ExamCrowdManage examCrowdManage) {
-        examCrowdManageService.save(examCrowdManage);
-        return WebResult.ok().message("创建考试人群成功");
+    public WebResult addCrowdManage(@RequestBody ExamCrowdManageDto examCrowdManageDto) {
+        ExamCrowdManage examCrowdManage = new ExamCrowdManage();
+        examCrowdManage.setCrowdName(examCrowdManageDto.getCrowdName());
+        examCrowdManage.setIncludeJobType(examCrowdManageDto.getIncludeJobType());
+        examCrowdManage.setIncludeDeptCodes(examCrowdManageDto.getIncludeDeptCodes());
+        examCrowdManage.setIncludePeoples(StringsUtil.stringRecomNew(examCrowdManageDto.getIncludePeoples().toString()));
+        if (examCrowdManageService.count(new QueryWrapper<ExamCrowdManage>().eq("crowd_name",examCrowdManage.getCrowdName()))==0) {
+            examCrowdManageService.save(examCrowdManage);
+            return WebResult.ok().message("创建考试人群成功");
+        }else {
+            return WebResult.fail().message("考试人群名称重复");
+        }
     }
 
     @GetMapping("/selectDeptName")
     public WebResult selectDeptName() {
         List<String> deptNameList =  userService.listObjs(new QueryWrapper<User>().lambda().select(User::getDeptName).eq(User::getDeleteFlag,0), Object::toString);
-        return WebResult.ok().data(deptNameList);
+        Stream<String> distinct = deptNameList.stream().distinct();
+        return WebResult.ok().data(distinct);
     }
 
     @GetMapping("/selectJobType")
     public WebResult selectJobType() {
         List<String> jobTypeList =  userService.listObjs(new QueryWrapper<User>().lambda().select(User::getJobType).eq(User::getDeleteFlag,0), Object::toString);
-        return WebResult.ok().data(jobTypeList);
+        Stream<String> distinct = jobTypeList.stream().distinct();
+        return WebResult.ok().data(distinct);
     }
 
     @GetMapping("/selectPeoples")
@@ -64,10 +78,20 @@ public class ExamCrowdManageController {
     }
 
     @PostMapping("/update")
-    public WebResult updateCrowdManage(@RequestBody ExamCrowdManage examCrowdManage) {
-        examCrowdManage.setUpdateTime(LocalDateTime.now());
-        examCrowdManageService.updateById(examCrowdManage);
-        return WebResult.ok().message("更新成功");
+    public WebResult updateCrowdManage(@RequestBody ExamCrowdManageDto examCrowdManageDto) {
+        ExamCrowdManage examCrowdManage = new ExamCrowdManage();
+        examCrowdManage.setId(examCrowdManageDto.getId());
+        examCrowdManage.setCrowdName(examCrowdManageDto.getCrowdName());
+        examCrowdManage.setIncludeJobType(examCrowdManageDto.getIncludeJobType());
+        examCrowdManage.setIncludeDeptCodes(examCrowdManageDto.getIncludeDeptCodes());
+        examCrowdManage.setIncludePeoples(StringsUtil.stringRecomNew(examCrowdManageDto.getIncludePeoples().toString()));
+        if (examCrowdManageService.count(new QueryWrapper<ExamCrowdManage>().eq("crowd_name",examCrowdManage.getCrowdName()))<2) {
+            examCrowdManage.setUpdateTime(LocalDateTime.now());
+            examCrowdManageService.updateById(examCrowdManage);
+            return WebResult.ok().message("更新成功");
+        }else {
+            return WebResult.fail().message("考试人群名称重复");
+        }
     }
 
     @DeleteMapping("/delete")
@@ -78,8 +102,9 @@ public class ExamCrowdManageController {
 
     @GetMapping("/selectCrowd")
     public WebResult selectCrowd(@RequestParam String crowdName) {
-        return WebResult.ok().data(examCrowdManageService.getMap(new QueryWrapper<ExamCrowdManage>()
-                .select("crowd_name","include_peoples").like(crowdName != null, "crowd_name", crowdName)));
+        return WebResult.ok().data(examCrowdManageService.list(new QueryWrapper<ExamCrowdManage>()
+                .select()
+                .eq("deleted",0)
+                .like(crowdName != null, "crowd_name", crowdName)));
     }
-
 }

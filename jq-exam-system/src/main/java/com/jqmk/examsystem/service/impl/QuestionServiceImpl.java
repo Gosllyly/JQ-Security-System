@@ -5,8 +5,11 @@ import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.entity.Question;
+import com.jqmk.examsystem.entity.TestPaper;
+import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
 import com.jqmk.examsystem.mapper.QuestionMapper;
 import com.jqmk.examsystem.service.QuestionService;
+import com.jqmk.examsystem.service.TestPaperService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -24,13 +27,18 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
     @Resource
     private QuestionMapper questionMapper;
+    @Resource
+    private TestPaperService testPaperService;
+    @Resource
+    private ExamInfoSummaryMapper examInfoSummaryMapper;
+    private static String wrongList = null;
 
     @Override
-    public Page selectQueryPage(String stem, Integer type, Long page, Long pageSize) {
+    public Page selectQueryPage(Integer questionBankId,String stem, Integer type, Long page, Long pageSize) {
         Page<Question> questionPage = new Page<>(page,pageSize);
         questionPage.addOrder(new OrderItem("update_time",false));
         Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().like(stem!=null,"stem",stem)
-                .eq(type!=null,"type",type)).getRecords());
+                .eq("question_bank_id",questionBankId).eq(type!=null,"type",type)).getRecords());
         return records;
     }
 
@@ -40,5 +48,42 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         questionPage.addOrder(new OrderItem("update_time",false));
         Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("question_bank_id",questionBankId)).getRecords());
         return records;
+    }
+
+    @Override
+    public void addCurrent(Integer id,Integer testId, String questionId,Integer examSummary) {
+        Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
+        TestPaper testPaper = testPaperService.getById(id);//分值
+        if (type==1) {//单选
+            examInfoSummaryMapper.updateScore(testPaper.getSingleChoiceScore(),examSummary);
+        }else if (type==2) {//多选
+            examInfoSummaryMapper.updateScore(testPaper.getMultiChoiceScore(),examSummary);
+        }else if (type==3) {//判断
+            examInfoSummaryMapper.updateScore(testPaper.getJudgeChoiceScore(),examSummary);
+        }
+    }
+
+    @Override
+    public void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary) {
+        Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
+        TestPaper testPaper = testPaperService.getById(id);//分值
+        if (type==1) {//单选
+            examInfoSummaryMapper.subtractScore(testPaper.getSingleChoiceScore(),examSummary);
+        }else if (type==2) {//多选
+            examInfoSummaryMapper.subtractScore(testPaper.getMultiChoiceScore(),examSummary);
+        }else if (type==3) {//判断
+            examInfoSummaryMapper.subtractScore(testPaper.getJudgeChoiceScore(),examSummary);
+        }
+        if (examInfoSummaryMapper.selectCountWrongId(examSummary)!=0) {
+            wrongList = examInfoSummaryMapper.selectWrongId(examSummary);
+            System.out.println("查出"+examInfoSummaryMapper.selectWrongId(examSummary));
+            wrongList = wrongList+","+questionId;
+            System.out.println("=============="+wrongList);
+            examInfoSummaryMapper.updateWrongId(wrongList,examSummary);
+        }else {
+            wrongList=questionId;
+            System.out.println("+++++++++++++"+wrongList);
+            examInfoSummaryMapper.updateWrongId(wrongList,examSummary);
+        }
     }
 }

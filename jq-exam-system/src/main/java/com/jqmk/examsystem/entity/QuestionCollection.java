@@ -1,13 +1,18 @@
 package com.jqmk.examsystem.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
-import java.io.Serializable;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
+
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * <p>
@@ -20,7 +25,7 @@ import lombok.experimental.Accessors;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("question_collection")
+@TableName(value = "question_collection",autoResultMap = true)
 public class QuestionCollection implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -34,14 +39,14 @@ public class QuestionCollection implements Serializable {
     private Long questionId;
 
     /**
-     * 所属题库id
+     * 所属题库
      */
-    private Integer questionBankId;
+    private String questionBankName;
 
     /**
      * 问题类型1(单选)，2(多选)，3(判断)
      */
-    private Boolean type;
+    private Integer type;
 
     /**
      * 题干
@@ -51,12 +56,14 @@ public class QuestionCollection implements Serializable {
     /**
      * 选项，使用 json 表示，举例: {"A":"XXXXX","B":"YYYYY"}
      */
-    private String options;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private JSONObject options;
 
     /**
      * 正确答案，使用 json 数组表示，举例：["A","B"]
      */
-    private String correctOptions;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String> correctOptions;
 
     /**
      * 解析

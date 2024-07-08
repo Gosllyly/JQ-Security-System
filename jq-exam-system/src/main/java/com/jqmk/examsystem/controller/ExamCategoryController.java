@@ -1,7 +1,9 @@
 package com.jqmk.examsystem.controller;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jqmk.examsystem.dto.ExamCategoryDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.ExamCategory;
 import com.jqmk.examsystem.entity.QuestionBank;
@@ -36,9 +38,9 @@ public class ExamCategoryController {
 
     @GetMapping("/main")
     public WebResult viewMain() {
-        return WebResult.ok().data(examCategoryMapper.selectMaps(
-                new QueryWrapper<ExamCategory>().lambda().select(ExamCategory::getId,ExamCategory::getCategoryName,ExamCategory::getParentId)
-                        .groupBy(ExamCategory::getId,ExamCategory::getParentId).eq(ExamCategory::getDeleted, 0).orderByDesc(ExamCategory::getUpdateTime)));
+        List<ExamCategory> examCategoryList = examCategoryMapper.selectList(new QueryWrapper<ExamCategory>().select("id","category_name","parent_id")
+                        .groupBy("id","parent_id").eq("deleted", 0).orderByDesc("update_time"));
+        return WebResult.ok().data(BeanUtil.copyToList(examCategoryList, ExamCategoryDto.class));
     }
 
     @GetMapping("/bankName")

@@ -1,6 +1,5 @@
 package com.jqmk.examsystem.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.ExamLearnScore;
 import com.jqmk.examsystem.dto.ExamLearnTime;
@@ -8,6 +7,7 @@ import com.jqmk.examsystem.dto.ExamRecordDto;
 import com.jqmk.examsystem.dto.WrongQuestion;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
+import com.jqmk.examsystem.mapper.TestPaperMapper;
 import com.jqmk.examsystem.service.ExamInfoSummaryService;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -31,48 +31,75 @@ import java.util.Map;
 @Service
 public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMapper, ExamInfoSummary> implements ExamInfoSummaryService {
 
-
+    @Resource
+    private TestPaperMapper testPaperMapper;
     @Resource
     private ExamInfoSummaryMapper examInfoSummaryMapper;
 
     @Override
-    public List<ExamRecordDto> viewMain(Integer userId, Long page, Long pageSize) {
-        List<ExamRecordDto> examRecordDtos = examInfoSummaryMapper.selectMain(userId,page,pageSize);
-        return examRecordDtos;
+    public Map<String, Object> viewMain(Integer userId,Integer noChallenge, Long page, Long pageSize) {
+        List<ExamRecordDto> examRecordDto = examInfoSummaryMapper.selectMain(userId,noChallenge,(page - 1) * pageSize,pageSize);
+        Integer total = examInfoSummaryMapper.countMain(userId,noChallenge);
+        Map<String, Object> res = new HashMap();
+        res.put("data", examRecordDto);
+        res.put("total", total);
+        return res;
      }
 
     @Override
-    public List<ExamRecordDto> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username, Long page, Long pageSize) {
-        List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.selectCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,page,pageSize);
+    public Map<String, Object> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username, Integer noChallenge,Long page, Long pageSize) {
+        List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.selectCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,noChallenge,(page - 1) * pageSize,pageSize);
+        Integer total = examInfoSummaryMapper.countCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,noChallenge);
+        Map<String, Object> res = new HashMap();
+        res.put("data", examRecordDtoList);
+        res.put("total", total);
+        return res;
+    }
+
+    @Override
+    public List<ExamRecordDto> exportExamRecord(Integer userId,Integer noChallenge) {
+        List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.exportAll(userId,noChallenge);
         return examRecordDtoList;
     }
 
     @Override
-    public List<ExamInfoSummary> exportExamRecord(Integer userId) {
-        List<ExamInfoSummary> examInfoSummaryList = examInfoSummaryMapper.selectList(new QueryWrapper<ExamInfoSummary>().select("name","end_time","exam_results","score")
-                .eq(userId != null, "user_id", userId));
-        return examInfoSummaryList;
-    }
-
-    @Override
-    public XSSFWorkbook createExcel(List<ExamInfoSummary> records, Integer userId) {
+    public XSSFWorkbook createExcel(List<ExamRecordDto> records) {
         XSSFWorkbook workbook = new XSSFWorkbook();
         XSSFSheet sheet = workbook.createSheet();
         int rowNum = 0;
         // 创建表头行并设置字段名
         Row headerRow = sheet.createRow(rowNum++);
         headerRow.createCell(0).setCellValue("试卷名称");
-        headerRow.createCell(1).setCellValue("完成时间");
-        headerRow.createCell(2).setCellValue("考试成绩结果");
-        headerRow.createCell(3).setCellValue("分数");
+        headerRow.createCell(1).setCellValue("员工姓名");
+        headerRow.createCell(2).setCellValue("部门");
+        headerRow.createCell(3).setCellValue("工种");
+        headerRow.createCell(4).setCellValue("考试时间");
+        headerRow.createCell(5).setCellValue("考试用时");
+        headerRow.createCell(6).setCellValue("答题总数");
+        headerRow.createCell(7).setCellValue("正确数");
+        headerRow.createCell(8).setCellValue("错误数");
+        headerRow.createCell(9).setCellValue("未做数");
+        headerRow.createCell(10).setCellValue("总分");
+        headerRow.createCell(11).setCellValue("成绩");
+        headerRow.createCell(12).setCellValue("考试情况");
+
 
         // 将数据写入 Excel 文件
-        for (ExamInfoSummary record : records) {
+        for (ExamRecordDto record : records) {
             Row row = sheet.createRow(rowNum++);
             row.createCell(0).setCellValue(record.getName());
-            row.createCell(1).setCellValue(record.getEndTime());
-            row.createCell(2).setCellValue(conventExamResults(record.getExamResults()));
-            row.createCell(3).setCellValue(record.getScore());;
+            row.createCell(1).setCellValue(record.getUsername());
+            row.createCell(2).setCellValue(record.getDeptName());
+            row.createCell(3).setCellValue(record.getJobType());
+            row.createCell(4).setCellValue(record.getStartTime());
+            row.createCell(5).setCellValue(record.getUnavailable());
+            row.createCell(6).setCellValue(record.getAnswerCount());
+            row.createCell(7).setCellValue(record.getAnswerCorrect());
+            row.createCell(8).setCellValue(record.getAnswerWrong());
+            row.createCell(9).setCellValue(record.getNoReply());
+            row.createCell(10).setCellValue(100);
+            row.createCell(11).setCellValue(record.getScore());
+            row.createCell(12).setCellValue(conventExamResults(record.getExamResults()));
         }
 
         return workbook;
@@ -207,6 +234,29 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     @Override
     public List<WrongQuestion> viewWrongMain(Integer user_id, Long page, Long pageSize) {
         return null;
+    }
+
+    @Override
+    public Integer insertNewRecord(Integer userId, Integer id, String userAnswer) {
+        //传入了问卷的id和用户id，用户答案列表
+        examInfoSummaryMapper.insertNewRecord(userId,id);
+        Integer newId = examInfoSummaryMapper.selectId(userId,id);
+        examInfoSummaryMapper.updateUserAnswer(newId,userAnswer);
+        return newId;
+    }
+
+    @Override
+    public void wrapTestPaper(Integer examSummary,Integer id) {//id是问卷规则的id
+        Integer examResults = examInfoSummaryMapper.equalsScore(examSummary);//判断是不是及格
+        if (examResults==1) {//及格
+            Integer learningScore = testPaperMapper.selectLearningScore(id);
+            Integer learningTime = testPaperMapper.selectLearningTime(id);
+            examInfoSummaryMapper.updateTestPaper(examSummary,learningScore,learningTime,examResults);
+        }else if (examResults==2) {//不及格
+            Integer learningScore = 0;
+            Integer learningTime = 0;
+            examInfoSummaryMapper.updateTestPaper(examSummary,learningScore,learningTime,examResults);
+        }
     }
 
     public String conventExamResults(Integer examResults) {

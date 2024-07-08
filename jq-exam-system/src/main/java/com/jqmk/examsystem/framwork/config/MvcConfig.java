@@ -1,5 +1,6 @@
 package com.jqmk.examsystem.framwork.config;
 
+import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.jqmk.examsystem.framwork.aop.JwtInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -33,5 +34,10 @@ public class MvcConfig implements WebMvcConfigurer {
     @Bean
     public JwtInterceptor jwtInterceptor() {
         return new JwtInterceptor();
+    }
+    @Bean
+    FastJsonHttpMessageConverter fastJsonHttpMessageConverter(){
+        FastJsonHttpMessageConverter converter=new FastJsonHttpMessageConverter();
+        return converter;
     }
 }

@@ -1,26 +1,25 @@
-package com.jqmk.examsystem.entity;
+package com.jqmk.examsystem.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
 
 /**
- * <p>
- * 考试类别
- * </p>
- *
- * @author tian
- * @since 2024-06-17
+ * @ClassName ExamCategoryDto
+ * @Author tian
+ * @Date 2024/7/4 8:47
+ * @Description 类别管理的展示实体类
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName("exam_category")
-public class ExamCategory implements Serializable {
+public class ExamCategoryDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -36,16 +35,5 @@ public class ExamCategory implements Serializable {
      * 父类别id，顶级类别的父为0
      */
     private Integer parentId;
-
-    /**
-     * 是否被删除，默认0，代表未被删除，1代表被删除
-     */
-    @TableLogic
-    private Integer deleted;
-
-//    private LocalDateTime createTime;
-//
-    private LocalDateTime updateTime;
-
 
 }

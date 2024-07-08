@@ -26,10 +26,10 @@ public class ExamLearnScore {
      * 本次考试获取学分
      */
     private Integer obtainLearningScore;
-    /**
-     * 总获取学分
-     */
-    private Integer credits;
+//    /**
+//     * 总获取学分
+//     */
+//    private Integer credits;
 
     /**
      * 考试完成时间（获取学分的时间）

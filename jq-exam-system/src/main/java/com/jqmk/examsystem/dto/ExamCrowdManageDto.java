@@ -1,4 +1,4 @@
-package com.jqmk.examsystem.entity;
+package com.jqmk.examsystem.dto;
 
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
@@ -11,18 +11,16 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * <p>
- * 记录分配好的考试人群大类和每一类具体的人，在后续进行问卷下发时使用
- * </p>
- *
- * @author tian
- * @since 2024-06-17
+ * @ClassName ExamCrowdManage
+ * @Author tian
+ * @Date 2024/7/5 10:34
+ * @Description
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
 @TableName(value = "exam_crowd_manage",autoResultMap = true)
-public class ExamCrowdManage implements Serializable {
+public class ExamCrowdManageDto implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -49,7 +47,8 @@ public class ExamCrowdManage implements Serializable {
     /**
      * 考试人的user列表
      */
-    private String includePeoples;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String>includePeoples;
 
     /**
      * 是否被删除，默认是0(未被删除)，1(已删除)
@@ -57,12 +56,10 @@ public class ExamCrowdManage implements Serializable {
     @TableLogic
     private Integer deleted;
 
-//    /**
+    //    /**
 //     * 创建时间
 //     */
 //    private LocalDateTime createTime;
 //
     private LocalDateTime updateTime;
-
-
 }

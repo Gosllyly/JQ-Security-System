@@ -1,20 +1,28 @@
 package com.jqmk.examsystem.controller;
 
 
+import cn.hutool.core.bean.BeanUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jqmk.examsystem.dto.ExamQuestion;
+import com.jqmk.examsystem.dto.TestPaperDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.*;
 import com.jqmk.examsystem.mapper.ExamCategoryMapper;
 import com.jqmk.examsystem.mapper.ExamCrowdManageMapper;
 import com.jqmk.examsystem.mapper.TestPaperMapper;
 import com.jqmk.examsystem.mapper.UserMapper;
+import com.jqmk.examsystem.service.ExamCrowdManageService;
 import com.jqmk.examsystem.service.TestPaperQuestionService;
 import com.jqmk.examsystem.service.TestPaperService;
+import com.jqmk.examsystem.service.UserService;
+import com.jqmk.examsystem.utils.StringsUtil;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * <p>
@@ -37,7 +45,11 @@ public class TestPaperController {
     @Resource
     private UserMapper userMapper;
     @Resource
+    private UserService userService;
+    @Resource
     private ExamCrowdManageMapper examCrowdManageMapper;
+    @Resource
+    private ExamCrowdManageService examCrowdManageService;
     @Resource
     private TestPaperQuestionService testPaperQuestionService;
 
@@ -45,9 +57,10 @@ public class TestPaperController {
     @GetMapping("/main")
     @Transactional
     public WebResult viewMain() {
-        return WebResult.ok().data(testPaperMapper.selectMaps(new QueryWrapper<TestPaper>()
+        List<TestPaper> testPaperList = testPaperService.list(new QueryWrapper<TestPaper>()
                 .select("id","name","exam_category_id","duration","pass_score","start_time","end_time","status","can_redo","time_limited")
-                .eq("no_challenge",0).orderByDesc("update_time")));
+                .eq("no_challenge",0).orderByDesc("update_time"));
+        return WebResult.ok().data(BeanUtil.copyToList(testPaperList, TestPaperDto.class));
     }
 
     @GetMapping("/examCrowd")
@@ -58,13 +71,20 @@ public class TestPaperController {
     @PostMapping("/add")
     public WebResult addTestPaperRuler(@RequestBody TestPaper testPaper) {
         testPaper.setNoChallenge(0);
+        List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
+                .like(ExamCrowdManage::getId,testPaper.getExamCategoryId()), Object::toString);
+        //从人群中查出人员姓名并拼接
+        testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.save(testPaper);
         return WebResult.ok().message("创建考试规则成功");
     }
 
     @PostMapping("/update")
     public WebResult updateTestPaperRuler(@RequestBody TestPaper testPaper) {
+        List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
+                .like(ExamCrowdManage::getId,testPaper.getExamCategoryId()), Object::toString);
         testPaper.setUpdateTime(LocalDateTime.now());
+        testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.updateById(testPaper);
         return WebResult.ok().message("更新成功");
     }
@@ -76,19 +96,31 @@ public class TestPaperController {
 
     @GetMapping("/viewUsername")
     public WebResult viewUsername() {
-        return WebResult.ok().data(userMapper.selectMaps(new QueryWrapper<User>().lambda().select(User::getUsername).eq( User::getDeleteFlag, 0)));
+        List<String> usernameList =  userService.listObjs(new QueryWrapper<User>().lambda().select(User::getUsername).eq( User::getDeleteFlag, 0), Object::toString);
+        Stream<String> distinct = usernameList.stream().distinct();
+        return WebResult.ok().data(distinct);
     }
 
     @GetMapping("/select")
     public WebResult selectTestRuler(@RequestParam(required=false) Integer examCategoryId,@RequestParam(required=false) String name,@RequestParam(required=false) Integer status) {
-        return WebResult.ok().data(testPaperMapper.selectMaps(new QueryWrapper<TestPaper>()
+        List<TestPaper> testPaperList = testPaperMapper.selectList(new QueryWrapper<TestPaper>()
                 .select("id","name","exam_category_id","duration","pass_score","start_time","end_time","status","can_redo","time_limited")
                 .eq(examCategoryId != null, "exam_category_id", examCategoryId)
                 .eq("no_challenge",0)
                 .eq(name != null, "name", name)
-                .eq(status != null, "status", status).orderByDesc("update_time")));
+                .eq(status != null, "status", status).orderByDesc("update_time"));
+        return WebResult.ok().data(BeanUtil.copyToList(testPaperList, TestPaperDto.class));
     }
-
+    @GetMapping("/selectPeoples")
+    public WebResult selectPeoples(Integer id) {
+        ExamCrowdManage examCrowdManage = examCrowdManageMapper.selectById(id);
+        return WebResult.ok().data(examCrowdManage.getIncludePeoples());
+    }
+    @GetMapping("/viewExam")
+    public WebResult viewExamById(Integer id) {
+        TestPaper testPaper = testPaperMapper.selectById(id);
+        return WebResult.ok().data(testPaper);
+    }
     /**
      * 我的考试界面
      * @param userId
@@ -111,19 +143,13 @@ public class TestPaperController {
      * @return
      */
     @GetMapping("/startExam")
-    public WebResult startMyExam(@RequestParam Integer id) {
-        testPaperQuestionService.startExam(id);
-        return WebResult.ok().data(testPaperQuestionService.startExam(id));
+    public WebResult startMyExam(@RequestParam Integer id,@RequestParam Integer userId) {
+        List<ExamQuestion> examQuestions = testPaperQuestionService.startExam(id,userId);
+        if (examQuestions!=null) {
+            return WebResult.ok().data(examQuestions);
+        }else {
+            return WebResult.ok().message("已经达到了答题次数上限");
+        }
     }
 
-    /** （未完成）
-     * 接收返回的试卷答题情况，判断分数
-     * @param examInfoSummary
-     * @return
-     */
-    @PostMapping("/correctExam")
-    public WebResult correctExam(@RequestBody ExamInfoSummary examInfoSummary) {
-
-        return WebResult.ok();
-    }
 }

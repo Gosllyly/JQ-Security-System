@@ -17,6 +17,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -62,7 +63,7 @@ public class QuestionBankController {
     }
 
     @PostMapping("/importQuestionBank")
-    public WebResult importExcel(@RequestParam("file") MultipartFile file,@RequestParam Integer questionBankId) {
+    public WebResult importExcel(@RequestParam("file") MultipartFile file,@RequestParam Integer questionBankId) throws IOException {
         questionBankService.importData(file,questionBankId);
         return WebResult.ok().message("导入成功");
     }
@@ -99,8 +100,8 @@ public class QuestionBankController {
     }
 
     @GetMapping("/selectQuestion")
-    public WebResult selectQuestion(@Nullable String stem, @Nullable Integer type, @RequestParam Long page, @RequestParam Long pageSize){
-        Page queryPage = questionService.selectQueryPage(stem,type,page,pageSize);
+    public WebResult selectQuestion(@RequestParam Integer questionBankId,@Nullable String stem, @Nullable Integer type, @RequestParam Long page, @RequestParam Long pageSize){
+        Page queryPage = questionService.selectQueryPage(questionBankId,stem,type,page,pageSize);
         return WebResult.ok().data(queryPage);
     }
 
@@ -109,5 +110,9 @@ public class QuestionBankController {
         Page records = questionService.selectBankByPage(questionBankId,page,pageSize);
         return WebResult.ok().data(records);
     }
-
+    @GetMapping("/selectBankName")
+    public WebResult selectBankName(){
+        List<Map<String, Object>> questionBankList =  questionBankService.listMaps(new QueryWrapper<QuestionBank>().lambda().select());
+        return WebResult.ok().data(questionBankList);
+    }
 }

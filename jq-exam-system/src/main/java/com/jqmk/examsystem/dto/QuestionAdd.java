@@ -1,4 +1,4 @@
-package com.jqmk.examsystem.entity;
+package com.jqmk.examsystem.dto;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.annotation.*;
@@ -6,7 +6,6 @@ import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.List;
 
 /**
  * <p>
@@ -18,7 +17,7 @@ import java.util.List;
  */
 @Data
 @TableName(value = "question",autoResultMap = true)
-public class Question implements Serializable {
+public class QuestionAdd implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -39,8 +38,7 @@ public class Question implements Serializable {
     /**
      * 正确答案，使用 json 数组表示，举例：["A","B"]
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> correctOptions;
+    private String correctOptions;
 
     /**
      * 解析
@@ -73,3 +71,4 @@ public class Question implements Serializable {
 //     */
 //    private LocalDateTime updateTime;
 }
+

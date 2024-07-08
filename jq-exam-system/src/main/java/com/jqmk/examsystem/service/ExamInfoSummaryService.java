@@ -22,13 +22,13 @@ import java.util.Map;
  */
 public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
-    List<ExamRecordDto> viewMain(Integer userId, Long page, Long pageSize);
+    Map<String, Object> viewMain(Integer userId,Integer noChallenge, Long page, Long pageSize);
 
-    List<ExamRecordDto> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username, Long page, Long pageSize);
+    Map<String, Object> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
 
-    List<ExamInfoSummary> exportExamRecord(Integer userId);
+    List<ExamRecordDto> exportExamRecord(Integer userId,Integer noChallenge);
 
-    XSSFWorkbook createExcel(List<ExamInfoSummary> examInfoSummaryList, Integer userId);
+    XSSFWorkbook createExcel(List<ExamRecordDto> examRecordDtoList);
 
     Map<String, Object> viewLearnScore(Long page, Long pageSize);
 
@@ -51,4 +51,8 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
     Map<String, Object> learnTimeCondition(String deptName, String username, String name, Long page, Long pageSize);
 
     List<WrongQuestion> viewWrongMain(Integer user_id, Long page, Long pageSize);
+
+    Integer insertNewRecord(Integer userId, Integer id, String userAnswer);
+
+    void wrapTestPaper(Integer examSummary,Integer id);
 }

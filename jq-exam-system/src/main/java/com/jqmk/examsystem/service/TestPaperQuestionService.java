@@ -16,5 +16,5 @@ import java.util.List;
  */
 public interface TestPaperQuestionService extends IService<TestPaperQuestion> {
 
-    List<ExamQuestion> startExam(Integer id);
+    List<ExamQuestion> startExam(Integer id,Integer userId);
 }

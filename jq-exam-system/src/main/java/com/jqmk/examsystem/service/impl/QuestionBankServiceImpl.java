@@ -3,10 +3,12 @@ package com.jqmk.examsystem.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jqmk.examsystem.dto.QuestionAdd;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.QuestionBank;
 import com.jqmk.examsystem.mapper.QuestionBankMapper;
 import com.jqmk.examsystem.mapper.QuestionMapper;
+import com.jqmk.examsystem.service.QuestionAddService;
 import com.jqmk.examsystem.service.QuestionBankService;
 import com.jqmk.examsystem.service.QuestionService;
 import com.jqmk.examsystem.utils.StringsUtil;
@@ -21,7 +23,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.List;
 
 /**
@@ -38,10 +39,12 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
     @Resource
     private QuestionService questionService;
     @Resource
+    private QuestionAddService questionAddService;
+    @Resource
     private QuestionMapper questionMapper;
     @Override
     public void importData(MultipartFile file,Integer questionBankId)  {
-        Question question = new Question();
+        QuestionAdd question = new QuestionAdd();
         Workbook workbook = null;
         try {
             workbook = WorkbookFactory.create(file.getInputStream());
@@ -56,17 +59,18 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
             Integer type =conventType(row.getCell(0).getStringCellValue());
             String stem = row.getCell(1).getStringCellValue();
             JSONObject options = StringsUtil.strToJson(row.getCell(2).getStringCellValue());
-            String correctOptions = row.getCell(3).getStringCellValue();
+            String correctOptions = StringsUtil.stringCut(row.getCell(3).getStringCellValue());
             String analysis = row.getCell(4).getStringCellValue();
             Integer status = conventStatus(row.getCell(5).getStringCellValue());
             question.setType(type);
             question.setStem(stem);
             question.setOptions(options);
-            question.setCorrectOptions(Collections.singletonList(correctOptions));
+            question.setCorrectOptions(correctOptions);
             question.setAnalysis(analysis);
             question.setStatus(status);
             question.setQuestionBankId(questionBankId);
-            questionService.save(question);
+            questionAddService.save(question);
+            System.out.println(question);
         }
     }
 

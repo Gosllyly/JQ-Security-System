@@ -14,7 +14,11 @@ import com.jqmk.examsystem.entity.Question;
  */
 public interface QuestionService extends IService<Question> {
 
-    Page selectQueryPage(String stem, Integer type, Long page, Long pageSize);
+    Page selectQueryPage(Integer questionBankId,String stem, Integer type, Long page, Long pageSize);
 
     Page selectBankByPage(Integer questionBankId, Long page, Long pageSize);
+
+    void addCurrent(Integer id,Integer testId, String questionId,Integer examSummary);
+
+    void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary);
 }

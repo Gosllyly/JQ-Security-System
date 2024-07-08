@@ -1,7 +1,7 @@
 package com.jqmk.examsystem.controller;
 
+import com.jqmk.examsystem.dto.ExamRecordDto;
 import com.jqmk.examsystem.dto.WebResult;
-import com.jqmk.examsystem.entity.ExamInfoSummary;
 import com.jqmk.examsystem.service.ExamCategoryService;
 import com.jqmk.examsystem.service.ExamInfoSummaryService;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -40,8 +40,8 @@ public class ChallengeResultController {
     @GetMapping("/main")
     @Transactional
     public WebResult viewMain(@RequestParam(required = false) Integer userId, @RequestParam Long page, @RequestParam Long pageSize) {
-        examInfoSummaryService.viewMain(userId,page,pageSize);
-        return WebResult.ok().data(examInfoSummaryService.viewMain(userId,page,pageSize));
+        Integer noChallenge = 1;//挑战答题
+        return WebResult.ok().data(examInfoSummaryService.viewMain(userId,noChallenge,page,pageSize));
     }
     /**
      * 同上接口一样，缺少答题数目和分数的返回
@@ -53,8 +53,8 @@ public class ChallengeResultController {
                                      @RequestParam(required = false) Integer examCategoryId, @RequestParam(required = false) String name, @RequestParam(required = false) Integer examResults,
                                      @RequestParam(required = false) String deptName, @RequestParam(required = false) String  jobType, @RequestParam(required = false) String username,
                                      @RequestParam Long page, @RequestParam Long pageSize) {
-        examInfoSummaryService.selectCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,page,pageSize);
-        return WebResult.ok().data(examInfoSummaryService.viewMain(userId,page,pageSize));
+        Integer noChallenge = 1;//挑战答题
+        return WebResult.ok().data(examInfoSummaryService.selectCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,noChallenge,page,pageSize));
     }
 
     /**
@@ -62,9 +62,10 @@ public class ChallengeResultController {
      */
     @GetMapping ("/exportAll")
     public WebResult exportQuestionBank(@RequestParam(required = false) Integer userId, HttpServletResponse response) throws IOException {
-        List<ExamInfoSummary> examInfoSummaryList = examInfoSummaryService.exportExamRecord(userId);
+        Integer noChallenge = 1;
+        List<ExamRecordDto> examInfoSummaryList = examInfoSummaryService.exportExamRecord(userId,noChallenge);
         // 使用ExportService创建并填充Excel文件
-        XSSFWorkbook workbook = examInfoSummaryService.createExcel(examInfoSummaryList,userId);
+        XSSFWorkbook workbook = examInfoSummaryService.createExcel(examInfoSummaryList);
         // 将Excel文件作为响应发送给客户端
         response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
         response.setHeader("Content-Disposition", "attachment; filename=records.xlsx");

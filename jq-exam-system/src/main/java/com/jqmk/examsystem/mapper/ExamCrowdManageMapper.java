@@ -3,6 +3,7 @@ package com.jqmk.examsystem.mapper;
 import com.jqmk.examsystem.entity.ExamCrowdManage;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Select;
 
 /**
  * <p>
@@ -15,4 +16,6 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface ExamCrowdManageMapper extends BaseMapper<ExamCrowdManage> {
 
+    @Select("SELECT DISTINCT user.username from user,exam_crowd_manage where exam_crowd_manage.id in (#{stringRecom})")
+    String selectNames(String stringRecom);
 }

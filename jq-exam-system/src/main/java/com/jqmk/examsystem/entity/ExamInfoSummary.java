@@ -21,7 +21,7 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("exam_info_summary")
+@TableName(value = "exam_info_summary",autoResultMap = true)
 public class ExamInfoSummary implements Serializable {
 
     private static final long serialVersionUID = 1L;
