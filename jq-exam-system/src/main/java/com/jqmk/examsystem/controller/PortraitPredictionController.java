@@ -25,7 +25,7 @@ import java.util.Map;
  */
 @RestController
 @RequestMapping("/warning/prediction")
-public class PortraitController {
+public class PortraitPredictionController {
 
     @Resource
     private PortraitPredictionService portraitPredictionService;
