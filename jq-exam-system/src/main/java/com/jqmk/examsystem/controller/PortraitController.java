@@ -14,7 +14,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * author: Goslly <br/>
@@ -28,26 +31,27 @@ public class PortraitController {
     private PortraitPredictionService portraitPredictionService;
 
     @PostMapping("/query")
-    public WebResult query(@RequestBody PortraitPredictionsReqDto dto){
+    public WebResult query(@RequestBody PortraitPredictionsReqDto dto) {
         PortraitPredictionsRespDto obtain = portraitPredictionService.query(dto);
         return WebResult.ok().data(obtain);
     }
 
     /**
      * 模拟 python web系统
+     *
      * @param dto
      * @return
      */
-        @PostMapping("/mock_python_web")
-    public WebResult mockPythonWeb(@RequestBody PyPredictionsReq dto){
+    @PostMapping("/mock_python_web")
+    public WebResult mockPythonWeb(@RequestBody PyPredictionsReq dto) {
         List<PyPredictionsReq.Employee> employees = dto.getEmployees();
         PyPredictionsResp resp = new PyPredictionsResp();
         Map<String, List<PyPredictionsResp.Prediction>> predictions = new HashMap<>();
         resp.setPredictions(predictions);
-        if (!employees.isEmpty()){
+        if (!employees.isEmpty()) {
             for (PyPredictionsReq.Employee employee : employees) {
                 List<LocalDate> dates = employee.getDates();
-                if (!dates.isEmpty()){
+                if (!dates.isEmpty()) {
                     List<PyPredictionsResp.Prediction> employeePredictions = new ArrayList<>();
                     for (LocalDate date : dates) {
 
@@ -57,7 +61,7 @@ public class PortraitController {
                                 .build();
                         employeePredictions.add(item);
                     }
-                    predictions.put(employee.getEmployeeId(),employeePredictions);
+                    predictions.put(employee.getEmployeeId(), employeePredictions);
                 }
             }
         }
