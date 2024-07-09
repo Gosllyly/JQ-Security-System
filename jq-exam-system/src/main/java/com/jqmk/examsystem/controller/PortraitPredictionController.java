@@ -32,8 +32,8 @@ public class PortraitPredictionController {
 
     @PostMapping("/query")
     public WebResult query(@RequestBody PortraitPredictionsReqDto dto) {
-        PortraitPredictionsRespDto obtain = portraitPredictionService.query(dto);
-        return WebResult.ok().data(obtain);
+        PortraitPredictionsRespDto finalResult = portraitPredictionService.query(dto);
+        return WebResult.ok().data(finalResult);
     }
 
     /**
