@@ -29,7 +29,7 @@ public class PortraitPredictionServiceImpl implements PortraitPredictionService 
 
     @Override
     public PortraitPredictionsRespDto query(PortraitPredictionsReqDto reqDto) {
-        WebResult result = RetrofitUtil.execute(portraitApi.obtainEmployeePredications(buildRequestBody(reqDto)), WebResult.class);
+        WebResult result = RetrofitUtil.execute(portraitApi.obtainEmployeePredications(buildRequestBody(reqDto)));
         PyPredictionsResp pyPredictionsResp = JSONUtil.toBean(JSON.toJSONString(result.getData()), PyPredictionsResp.class);
 
         // 根据返回信息填充最终的 PortraitPredictionsRespDto

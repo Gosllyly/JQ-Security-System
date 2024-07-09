@@ -17,23 +17,17 @@ public class RetrofitUtil {
      * 获取响应体详情
      *
      * @param call
-     * @param clazz
      * @param <T>
      * @return
      */
-    public static <T> T execute(Call<T> call, Class<T> clazz) {
+    public static <T> T execute(Call<T> call) {
         try {
             Response<T> response = call.execute();
-
-            if (response.code() == 200) {
-                String data = response.body().toString();
-                log.info("正常请求返回: " + data);
-                return response.body();
-
-            } else {
-                log.info("异常请求返回 response: " + response);
-                return response.body();
+            if (response.code() != 200) {
+                log.info("异常请求返回 response:" + response.body().toString() );
+                throw new IllegalStateException("三方 web 服务端异常");
             }
+            return response.body();
         } catch (IOException e) {
             log.error("调用 Retrofit API 失败. request={}", call, e);
             throw new IllegalStateException("调用 Retrofit API 失败");
