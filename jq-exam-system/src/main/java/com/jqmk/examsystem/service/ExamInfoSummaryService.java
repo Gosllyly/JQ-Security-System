@@ -4,11 +4,9 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.jqmk.examsystem.dto.ExamLearnScore;
 import com.jqmk.examsystem.dto.ExamLearnTime;
 import com.jqmk.examsystem.dto.ExamRecordDto;
-import com.jqmk.examsystem.dto.WrongQuestion;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -24,7 +22,7 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     Map<String, Object> viewMain(Integer userId,Integer noChallenge, Long page, Long pageSize);
 
-    Map<String, Object> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
+    Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
 
     List<ExamRecordDto> exportExamRecord(Integer userId,Integer noChallenge);
 
@@ -50,9 +48,9 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     Map<String, Object> learnTimeCondition(String deptName, String username, String name, Long page, Long pageSize);
 
-    List<WrongQuestion> viewWrongMain(Integer user_id, Long page, Long pageSize);
+    Map<String, Object> viewWrongMain(Integer userId, Long page, Long pageSize);
 
-    Integer insertNewRecord(Integer userId, Integer id, String userAnswer);
+    Map<String, Object> correctingTestPaper(Integer id, Integer userId, List<String> userAnswer);
 
-    void wrapTestPaper(Integer examSummary,Integer id);
+    Map<String, Object> selectWrong(Integer userId, Integer type, String stem, Long page, Long pageSize);
 }

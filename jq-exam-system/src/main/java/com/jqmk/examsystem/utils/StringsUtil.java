@@ -78,7 +78,27 @@ public class StringsUtil {
         if (str!=null) {
             String newStr = str.replaceAll("\n", "\",\"");
             List<String> list = new ArrayList<>(Arrays.asList(newStr));
+            /**  用StringBuilder作字符串拼接  */
+            StringBuilder sb = new StringBuilder();
+            sb.append("[\"");
+            int seq = 1;
+            for (String s : list) {
 
+                sb.append(s);
+                if (seq++ != list.size()){
+                    sb.append(",");
+                }
+            }
+            sb.append("\"]");
+            return String.valueOf(sb);
+        }else {
+            return null;
+        }
+    }
+    public static String strToList (String str) {
+        if (str!=null) {
+            String newStr = str.replaceAll(",", "\",\"");
+            List<String> list = new ArrayList<>(Arrays.asList(newStr));
             /**  用StringBuilder作字符串拼接  */
             StringBuilder sb = new StringBuilder();
             sb.append("[\"");

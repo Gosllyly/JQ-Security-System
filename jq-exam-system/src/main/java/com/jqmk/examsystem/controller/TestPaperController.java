@@ -7,10 +7,7 @@ import com.jqmk.examsystem.dto.ExamQuestion;
 import com.jqmk.examsystem.dto.TestPaperDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.*;
-import com.jqmk.examsystem.mapper.ExamCategoryMapper;
-import com.jqmk.examsystem.mapper.ExamCrowdManageMapper;
-import com.jqmk.examsystem.mapper.TestPaperMapper;
-import com.jqmk.examsystem.mapper.UserMapper;
+import com.jqmk.examsystem.mapper.*;
 import com.jqmk.examsystem.service.ExamCrowdManageService;
 import com.jqmk.examsystem.service.TestPaperQuestionService;
 import com.jqmk.examsystem.service.TestPaperService;
@@ -42,6 +39,8 @@ public class TestPaperController {
     private TestPaperMapper testPaperMapper;
     @Resource
     private ExamCategoryMapper examCategoryMapper;
+    @Resource
+    private ExamInfoSummaryMapper examInfoSummaryMapper;
     @Resource
     private UserMapper userMapper;
     @Resource
@@ -127,13 +126,13 @@ public class TestPaperController {
      * @return
      */
     @GetMapping("/myExam")
-    public WebResult selectMyExam(@RequestParam Integer userId) {
+    public WebResult selectMyExam(@RequestParam Integer userId,@RequestParam Integer noChallenge) {
         User user =  userMapper.selectById(userId);
         return WebResult.ok().data(testPaperMapper.selectMaps(new QueryWrapper<TestPaper>()
                 .select("id","name","duration","pass_score","start_time","end_time","single_choice_num",
                         "single_choice_score","multi_choice_num","multi_choice_score","judge_choice_num","judge_choice_score")
                 .eq( "status", 0)
-                .eq("no_challenge",0)
+                .eq("no_challenge",noChallenge)
                 .like("exam_crowd_ids",user.getUsername())));
     }
 
@@ -146,6 +145,7 @@ public class TestPaperController {
     public WebResult startMyExam(@RequestParam Integer id,@RequestParam Integer userId) {
         List<ExamQuestion> examQuestions = testPaperQuestionService.startExam(id,userId);
         if (examQuestions!=null) {
+            examInfoSummaryMapper.insertNewRecord(userId,id);
             return WebResult.ok().data(examQuestions);
         }else {
             return WebResult.ok().message("已经达到了答题次数上限");

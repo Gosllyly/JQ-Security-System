@@ -3,6 +3,7 @@ package com.jqmk.examsystem.mapper;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jqmk.examsystem.dto.ExamInfoSummaryDto;
 import com.jqmk.examsystem.dto.ExamQuestion;
+import com.jqmk.examsystem.dto.WrongQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.framwork.config.JsonTypeHandler;
 import org.apache.ibatis.annotations.*;
@@ -61,4 +62,32 @@ public interface QuestionMapper extends BaseMapper<Question> {
     @Select("select user_answers,exam_results,score,obtain_learning_score,obtain_learning_time,timediff(end_time,start_time) as unavailable " +
             "from exam_info_summary where id = #{examSummary}")
     List<ExamInfoSummaryDto> selectUserAnswer(Integer examSummary);
+
+    @Results({
+            @Result(property = "options", column = "options", typeHandler = JsonTypeHandler.class),
+            @Result(property = "correctOptions", column = "correct_options", typeHandler = JsonTypeHandler.class),
+            @Result(property = "errorOptions", column = "error_options", typeHandler = JsonTypeHandler.class)
+    })
+    @Select("select DISTINCT(stem),id,user_id,question_bank_name,options,correct_options,analysis,type,error_options,create_time from user_error_records " +
+            "where user_id =#{userId} GROUP BY user_id,stem ORDER BY create_time desc limit ${page}, ${pageSize}")
+    List<WrongQuestion> selectErrorQuestion(Integer userId,Long page,Long pageSize);
+    @Select("select COUNT(DISTINCT stem) from user_error_records where user_id =#{userId} ")
+    Integer countErrorQuestion(Integer userId);
+
+    @Insert("INSERT INTO user_error_records(`user_id`, `question_bank_name`,`stem`,`options`,`correct_options`,`analysis`,`type`,`error_options`) " +
+            "SELECT DISTINCT #{userId},qb.bank_name,q.stem,q.`options`,q.correct_options,q.analysis,q.type,#{wrong} FROM question as q,question_bank as qb where q.id = #{questionId} and q.question_bank_id = qb.id")
+    void addWrongsInfo(String questionId, String wrong,Integer userId);
+
+    @Results({
+            @Result(property = "options", column = "options", typeHandler = JsonTypeHandler.class),
+            @Result(property = "correctOptions", column = "correct_options", typeHandler = JsonTypeHandler.class),
+            @Result(property = "errorOptions", column = "error_options", typeHandler = JsonTypeHandler.class)
+    })
+    @Select("select DISTINCT(stem),id,user_id,question_bank_name,options,correct_options,analysis,type,error_options,create_time from user_error_records " +
+            "where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') and (#{type} IS NULL OR type = #{type}) GROUP BY user_id,stem ORDER BY create_time desc limit ${page}, ${pageSize}")
+    List<WrongQuestion> errorQuestionCondition(Integer userId, Integer type, String stem, Long page, Long pageSize);
+    @Select("select COUNT(DISTINCT stem) from user_error_records where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') " +
+            "and (#{type} IS NULL OR type = #{type}) ")
+    Integer countErrorQuestionCondition(Integer userId, Integer type, String stem);
+
 }

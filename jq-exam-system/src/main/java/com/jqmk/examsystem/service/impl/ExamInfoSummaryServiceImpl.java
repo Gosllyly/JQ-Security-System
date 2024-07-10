@@ -1,21 +1,25 @@
 package com.jqmk.examsystem.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.jqmk.examsystem.dto.ExamLearnScore;
-import com.jqmk.examsystem.dto.ExamLearnTime;
-import com.jqmk.examsystem.dto.ExamRecordDto;
-import com.jqmk.examsystem.dto.WrongQuestion;
+import com.jqmk.examsystem.dto.*;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
+import com.jqmk.examsystem.entity.TestPaperQuestion;
 import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
+import com.jqmk.examsystem.mapper.QuestionMapper;
 import com.jqmk.examsystem.mapper.TestPaperMapper;
 import com.jqmk.examsystem.service.ExamInfoSummaryService;
+import com.jqmk.examsystem.service.QuestionService;
+import com.jqmk.examsystem.service.TestPaperQuestionService;
+import com.jqmk.examsystem.utils.StringsUtil;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -35,6 +39,12 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     private TestPaperMapper testPaperMapper;
     @Resource
     private ExamInfoSummaryMapper examInfoSummaryMapper;
+    @Resource
+    private QuestionMapper questionMapper;
+    @Resource
+    private QuestionService questionService;
+    @Resource
+    private TestPaperQuestionService testPaperQuestionService;
 
     @Override
     public Map<String, Object> viewMain(Integer userId,Integer noChallenge, Long page, Long pageSize) {
@@ -47,7 +57,7 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
      }
 
     @Override
-    public Map<String, Object> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username, Integer noChallenge,Long page, Long pageSize) {
+    public Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username, Integer noChallenge,Long page, Long pageSize) {
         List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.selectCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,noChallenge,(page - 1) * pageSize,pageSize);
         Integer total = examInfoSummaryMapper.countCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,noChallenge);
         Map<String, Object> res = new HashMap();
@@ -232,20 +242,33 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public List<WrongQuestion> viewWrongMain(Integer user_id, Long page, Long pageSize) {
-        return null;
+    public Map<String, Object> viewWrongMain(Integer userId, Long page, Long pageSize) {
+        List<WrongQuestion> errorQuestion = questionMapper.selectErrorQuestion(userId,(page - 1) * pageSize,pageSize);
+        Integer total = questionMapper.countErrorQuestion(userId);;
+        Map<String, Object> res = new HashMap();
+        res.put("question", errorQuestion);
+        res.put("total", total);
+        return res;
     }
 
     @Override
+    public Map<String, Object> selectWrong(Integer userId, Integer type, String stem, Long page, Long pageSize) {
+        List<WrongQuestion> errorQuestion = questionMapper.errorQuestionCondition(userId,type,stem,(page - 1) * pageSize,pageSize);
+        Integer total = questionMapper.countErrorQuestionCondition(userId,type,stem);
+        Map<String, Object> res = new HashMap();
+        res.put("question", errorQuestion);
+        res.put("total", total);
+        return res;
+    }
+
     public Integer insertNewRecord(Integer userId, Integer id, String userAnswer) {
         //传入了问卷的id和用户id，用户答案列表
-        examInfoSummaryMapper.insertNewRecord(userId,id);
+        //examInfoSummaryMapper.insertNewRecord(userId,id);
         Integer newId = examInfoSummaryMapper.selectId(userId,id);
         examInfoSummaryMapper.updateUserAnswer(newId,userAnswer);
         return newId;
     }
 
-    @Override
     public void wrapTestPaper(Integer examSummary,Integer id) {//id是问卷规则的id
         Integer examResults = examInfoSummaryMapper.equalsScore(examSummary);//判断是不是及格
         if (examResults==1) {//及格
@@ -257,6 +280,45 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
             Integer learningTime = 0;
             examInfoSummaryMapper.updateTestPaper(examSummary,learningScore,learningTime,examResults);
         }
+    }
+
+    @Override
+    public Map<String, Object> correctingTestPaper(Integer id, Integer userId, List<String> userAnswer) {
+        Integer examSummary = insertNewRecord(userId,id, StringsUtil.stringRecom(userAnswer.toString()));//生成新的问卷方法，用于后续进行成绩录入
+        questionMapper.insertRecord(id,examSummary,userId);//插入新的答题情况记录
+        Integer testId = questionMapper.selectId(id,userId);//找到刚插入的id
+        //通过传入，得到问题id
+        List<String> list =  testPaperQuestionService.listObjs(new QueryWrapper<TestPaperQuestion>().lambda().select(TestPaperQuestion::getQuestionId).eq(TestPaperQuestion::getTestPaperId,id), Object::toString);
+        JSONObject json = new JSONObject(StringsUtil.stringRecom(userAnswer.toString()));
+        String a =StringsUtil.listWipe(list.get(list.size()-1).toString());
+        List<String> list1= Arrays.asList(a.split(","));
+//        System.out.println("json="+json);
+        for (int i = 0; i < list1.size(); i++) {
+            //list1.get(i)为问题id，通过问题的id查找对应的正确答案
+            String daan = questionMapper.selectCurrent(Integer.valueOf(list1.get(i)));
+//            System.out.println("题号" + list1.get(i));
+//            System.out.println("用户选的" + json.getString(list1.get(i)));
+//            System.out.println("答案" + StringsUtil.stringRecom(daan).replaceAll("\"", ""));
+            if (json.getString(list1.get(i)).equals("")) {
+//                System.out.println("======未作答=====");
+                questionMapper.addNoReply(testId);
+            } else if (StringsUtil.stringRecom(daan).replaceAll("\"", "").equals(json.getString(list1.get(i)))) {
+//                System.out.println("======答对了=====");
+                questionService.addCurrent(id,testId,list1.get(i),examSummary);
+            } else if (!StringsUtil.stringRecom(daan).replaceAll("\"", "").equals(json.getString(list1.get(i)))) {
+//                System.out.println("======答错了=====");
+                questionService.addWrongs(id,testId,list1.get(i),examSummary,json.getString(list1.get(i)),userId);
+            }
+        }
+        //统计完分数，对试卷进行设置结束时间
+        wrapTestPaper(examSummary,id);
+        String questionIds = questionMapper.selectQuestionIds(id);
+        List<ExamQuestion> question = questionMapper.selectQuestion(StringsUtil.stringWipe(questionIds));
+        List<ExamInfoSummaryDto> examInfoSummaryList = questionMapper.selectUserAnswer(examSummary);
+        Map<String, Object> res = new HashMap();
+        res.put("question", question);
+        res.put("answer", examInfoSummaryList);
+        return res;
     }
 
     public String conventExamResults(Integer examResults) {

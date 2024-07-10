@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -49,7 +48,7 @@ public class ChallengeResultController {
      */
     @GetMapping("/select")
     @Transactional
-    public WebResult selectCondition(@RequestParam(required = false) Integer userId, @RequestParam(required = false) LocalDateTime startTime, @RequestParam(required = false) LocalDateTime endTime,
+    public WebResult selectCondition(@RequestParam(required = false) Integer userId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime,
                                      @RequestParam(required = false) Integer examCategoryId, @RequestParam(required = false) String name, @RequestParam(required = false) Integer examResults,
                                      @RequestParam(required = false) String deptName, @RequestParam(required = false) String  jobType, @RequestParam(required = false) String username,
                                      @RequestParam Long page, @RequestParam Long pageSize) {
