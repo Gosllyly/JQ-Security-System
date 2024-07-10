@@ -10,7 +10,6 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -39,14 +38,14 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime} ) AND (#{examCategoryId} IS NULL OR ex.exam_category_id = #{examCategoryId}) " +
             "AND (#{name} IS NULL OR ex.name = #{name}) AND (#{examResults} IS NULL OR ex.exam_results = #{examResults}) AND (#{deptName} IS NULL OR user.dept_name = #{deptName}) AND (#{jobType} IS NULL OR user.job_type = #{jobType}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) and test_paper.no_challenge=#{noChallenge} GROUP BY ar.id limit ${page}, ${pageSize} ")
-    List<ExamRecordDto> selectCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
+    List<ExamRecordDto> selectCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
 
     @Select("SELECT count(*) FROM `user`,test_paper,exam_info_summary as ex,answers_records as ar " +
             "where user.id = ex.user_id and user.id = ar.user_id and test_paper.id = ar.test_paper_id and ex.test_paper_id = ar.test_paper_id and ar.exam_info_summary_id = ex.id AND (#{userId} IS NULL OR user.id = #{userId}) " +
             "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime} ) AND (#{examCategoryId} IS NULL OR ex.exam_category_id = #{examCategoryId}) " +
             "AND (#{name} IS NULL OR ex.name = #{name}) AND (#{examResults} IS NULL OR ex.exam_results = #{examResults}) AND (#{deptName} IS NULL OR user.dept_name = #{deptName}) AND (#{jobType} IS NULL OR user.job_type = #{jobType}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) and test_paper.no_challenge=#{noChallenge} ")
-    Integer countCondition(Integer userId, LocalDateTime startTime, LocalDateTime endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge);
+    Integer countCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge);
     @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,SUM(test_paper.learning_score) as credits ,ex.end_time " +
             "FROM `user`,exam_info_summary as ex,test_paper where ex.user_id =user.id GROUP BY user.username,ex.`name` order by end_time desc  limit ${page},${pageSize} ")
     List<ExamLearnScore> viewInterface(Long page, Long pageSize);
@@ -133,4 +132,5 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "ar.answer_correct,ar.answer_wrong,ar.no_reply,ex.exam_results,timediff(ex.end_time,ex.start_time) as unavailable FROM `user`,test_paper,exam_info_summary as ex,answers_records as ar " +
             "where user.id = ex.user_id and user.id = ar.user_id and test_paper.id = ar.test_paper_id and ex.test_paper_id = ar.test_paper_id and ar.exam_info_summary_id = ex.id and test_paper.no_challenge=#{noChallenge} AND (#{userId} IS NULL OR user.id = #{userId}) GROUP BY ar.id ")
     List<ExamRecordDto> exportAll(Integer userId,Integer noChallenge);
+
 }

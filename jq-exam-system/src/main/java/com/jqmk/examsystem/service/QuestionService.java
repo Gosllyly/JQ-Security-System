@@ -20,5 +20,6 @@ public interface QuestionService extends IService<Question> {
 
     void addCurrent(Integer id,Integer testId, String questionId,Integer examSummary);
 
-    void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary);
+    void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary,String wrong,Integer userId);
+
 }

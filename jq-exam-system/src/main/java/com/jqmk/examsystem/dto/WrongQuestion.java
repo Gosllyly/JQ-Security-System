@@ -1,12 +1,13 @@
 package com.jqmk.examsystem.dto;
 
-import com.alibaba.fastjson.JSONObject;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.Data;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * @ClassName WrongQuestion
@@ -15,7 +16,15 @@ import java.util.List;
  * @Description 错题的实体类
  */
 @Data
+@TableName(value = "user_error_records",autoResultMap = true)
 public class WrongQuestion {
+
+
+    private static final long serialVersionUID = 1L;
+
+    @TableId(value = "id", type = IdType.INPUT)
+    private Long id;
+
     /**
      * 题干
      */
@@ -25,19 +34,15 @@ public class WrongQuestion {
      * 选项，使用 json 表示，举例: {"A":"XXXXX","B":"YYYYY"}
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private JSONObject options;
+    @JsonProperty("options")
+    private JsonNode options;
 
     /**
      * 正确答案，使用 json 数组表示，举例：["A","B"]
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> correctOptions;
-
-    /**
-     * 错误答案，使用 json 数组表示，举例：["A","B"]
-     */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> wrongOptions;
+    @JsonProperty("correctOptions")
+    private JsonNode correctOptions;
 
     /**
      * 解析
@@ -52,9 +57,13 @@ public class WrongQuestion {
     /**
      * 所属题库id
      */
-    private Integer questionBankId;
+    private String questionBankName;
     /**
-     * 考试完成时间
+     * 所属题库id
      */
-    private LocalDateTime endTime;
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    @JsonProperty("errorOptions")
+    private JsonNode errorOptions;
+
+    private String createTime;
 }
