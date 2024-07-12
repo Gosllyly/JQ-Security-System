@@ -39,7 +39,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         Page<Question> questionPage = new Page<>(page,pageSize);
         questionPage.addOrder(new OrderItem("update_time",false));
         Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().like(stem!=null,"stem",stem)
-                .eq("question_bank_id",questionBankId).eq(type!=null,"type",type)).getRecords());
+                .eq( "question_bank_id",questionBankId).eq(type!=null,"type",type)).getRecords());
         return records;
     }
 
@@ -69,22 +69,20 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
         TestPaper testPaper = testPaperService.getById(id);//分值
         questionMapper.addWrongsInfo(questionId, StringsUtil.strToList(wrong),userId);
-        if (type==1) {//单选
-            examInfoSummaryMapper.subtractScore(testPaper.getSingleChoiceScore(),examSummary);
-        }else if (type==2) {//多选
-            examInfoSummaryMapper.subtractScore(testPaper.getMultiChoiceScore(),examSummary);
-        }else if (type==3) {//判断
-            examInfoSummaryMapper.subtractScore(testPaper.getJudgeChoiceScore(),examSummary);
-        }
+//        if (type==1) {//单选
+//            examInfoSummaryMapper.subtractScore(testPaper.getSingleChoiceScore(),examSummary);
+//        }else if (type==2) {//多选
+//            examInfoSummaryMapper.subtractScore(testPaper.getMultiChoiceScore(),examSummary);
+//        }else if (type==3) {//判断
+//            examInfoSummaryMapper.subtractScore(testPaper.getJudgeChoiceScore(),examSummary);
+//        }
         if (examInfoSummaryMapper.selectCountWrongId(examSummary)!=0) {
             wrongList = examInfoSummaryMapper.selectWrongId(examSummary);
             System.out.println("查出"+examInfoSummaryMapper.selectWrongId(examSummary));
             wrongList = wrongList+","+questionId;
-            System.out.println("=============="+wrongList);
             examInfoSummaryMapper.updateWrongId(wrongList,examSummary);
         }else {
             wrongList=questionId;
-            System.out.println("+++++++++++++"+wrongList);
             examInfoSummaryMapper.updateWrongId(wrongList,examSummary);
         }
     }

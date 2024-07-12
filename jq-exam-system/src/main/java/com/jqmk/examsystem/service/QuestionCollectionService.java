@@ -13,5 +13,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface QuestionCollectionService extends IService<QuestionCollection> {
 
-    void collection(Integer userId, Integer questionId);
+    void collection(QuestionCollection questionCollection);
+
+    void removeCollection(QuestionCollection questionCollection);
 }

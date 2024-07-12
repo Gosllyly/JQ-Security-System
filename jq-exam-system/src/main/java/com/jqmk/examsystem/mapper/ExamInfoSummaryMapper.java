@@ -47,9 +47,9 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "AND (#{username} IS NULL OR user.username = #{username}) and test_paper.no_challenge=#{noChallenge} ")
     Integer countCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge);
     @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,SUM(test_paper.learning_score) as credits ,ex.end_time " +
-            "FROM `user`,exam_info_summary as ex,test_paper where ex.user_id =user.id GROUP BY user.username,ex.`name` order by end_time desc  limit ${page},${pageSize} ")
+            "FROM `user`,exam_info_summary as ex,test_paper where ex.user_id =user.id GROUP BY user.username,ex.id order by end_time desc  limit ${page},${pageSize} ")
     List<ExamLearnScore> viewInterface(Long page, Long pageSize);
-    @Select("SELECT count(*) FROM `user`,exam_info_summary as ex,test_paper where ex.user_id =user.id GROUP BY user.username,ex.`name` limit 1")
+    @Select("SELECT COUNT(*) FROM `user`,exam_info_summary as ex where ex.user_id =user.id")
     Integer viewInterfaceCount();
 
     @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,ex.end_time FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
@@ -63,11 +63,11 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
 
     @Select("SELECT `user`.username,user.dept_name,ex.`name`,sum(ex.obtain_learning_score) as obtainLearningScore, ex.end_time FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{examCategoryId} IS NULL OR ex.exam_category_id = #{examCategoryId}) AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) " +
-            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id order by ex.end_time desc limit ${page}, ${pageSize} ")
+            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id group by ex.name order by ex.end_time desc limit ${page}, ${pageSize} ")
     List<ExamLearnScore> learnScoreCondition(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize);
-    @Select("SELECT count(*) FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
+    @Select("SELECT COUNT(DISTINCT ex.name)  FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{examCategoryId} IS NULL OR ex.exam_category_id = #{examCategoryId}) AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) " +
-            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id GROUP BY user.username,ex.`name` limit 1 ")
+            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id ")
     Integer learnScoreConditionCount(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime);
 
     @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_time,ex.end_time,test_paper.learning_time " +
@@ -86,10 +86,10 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     Integer selectLearnTimeCount(String deptName, String username, String name);
 
     @Select("SELECT `user`.username,user.dept_name,ex.`name`,SUM(ex.obtain_learning_time) as obtainLearningTime,ex.end_time,SUM(test_paper.learning_time) as learningTime FROM `user`,exam_info_summary as ex,test_paper where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
-            "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) and ex.user_id =user.id and test_paper.id = ex.test_paper_id GROUP BY user.id order by ex.end_time desc limit ${page}, ${pageSize} ")
+            "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) and ex.user_id =user.id and test_paper.id = ex.test_paper_id GROUP BY ex.name order by ex.end_time desc limit ${page}, ${pageSize} ")
     List<ExamLearnTime> learnTimeCondition(String deptName, String username, String name, Long page, Long pageSize);
 
-    @Select("SELECT count(*) FROM `user`,exam_info_summary as ex,test_paper where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
+    @Select("SELECT COUNT(DISTINCT ex.name) FROM `user`,exam_info_summary as ex,test_paper where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) and ex.user_id =user.id and test_paper.id = ex.test_paper_id")
     Integer learnTimeConditionCount(String deptName, String username, String name);
 
