@@ -51,6 +51,8 @@ public class TestPaperController {
     private ExamCrowdManageService examCrowdManageService;
     @Resource
     private TestPaperQuestionService testPaperQuestionService;
+    @Resource
+    private QuestionMapper questionMapper;
 
 
     @GetMapping("/main")
@@ -69,6 +71,15 @@ public class TestPaperController {
 
     @PostMapping("/add")
     public WebResult addTestPaperRuler(@RequestBody TestPaper testPaper) {
+        if (testPaper.getSingleChoiceNum() > questionMapper.countSingleChoiceQuestionByBankId(testPaper.get)) {
+            return WebResult.fail().message("单选题数量不能超过题库中的数量");
+        }
+        if (testPaper.getMultiChoiceNum() > questionBank.getMultiChoiceNum()) {
+            return WebResult.fail().message("多选题数量不能超过题库中的数量");
+        }
+        if (testPaper.getJudgeChoiceNum() > questionBank.getJudgeChoiceNum()) {
+            return WebResult.fail().message("判断题数量不能超过题库中的数量");
+        }
         testPaper.setNoChallenge(0);
         List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
                 .like(ExamCrowdManage::getId,testPaper.getExamCategoryId()), Object::toString);

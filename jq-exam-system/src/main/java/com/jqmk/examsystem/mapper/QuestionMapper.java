@@ -90,4 +90,12 @@ public interface QuestionMapper extends BaseMapper<Question> {
             "and (#{type} IS NULL OR type = #{type}) ")
     Integer countErrorQuestionCondition(Integer userId, Integer type, String stem);
 
+    @Select("select COUNT(DISTINCT stem) from questions where type = 1 and status = 0 and question_bank_id = #{question_bank_id} ")
+    Integer countSingleChoiceQuestionByBankId(Integer question_bank_id);
+
+    @Select("select COUNT(DISTINCT stem) from questions where type = 2 and status = 0 and question_bank_id = #{question_bank_id} ")
+    Integer countMultiChoiceQuestionByBankId(Integer question_bank_id);
+
+    @Select("select COUNT(DISTINCT stem) from questions where type = 3 and status = 0 and question_bank_id = #{question_bank_id} ")
+    Integer countJudgmentQuestionByBankId(Integer question_bank_id);
 }
