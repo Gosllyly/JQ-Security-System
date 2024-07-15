@@ -21,7 +21,7 @@ public class ExamTimeoutTask {
     @Resource
     private ExamInfoSummaryMapper examInfoSummaryMapper;
 
-    @Scheduled(fixedRate = 60*1000) // 每小时执行一次
+    @Scheduled(fixedRate = 60*60*1000) // 每小时执行一次
     public void checkExamTimeout() {
         LocalDateTime now = LocalDateTime.now();
         //查找超时的答卷
@@ -35,6 +35,7 @@ public class ExamTimeoutTask {
             Integer learningTime = 0;
             //记为不合格
             examInfoSummaryMapper.updateTestPaper(record_id,learningScore,learningTime,2);
+
         }
     }
 

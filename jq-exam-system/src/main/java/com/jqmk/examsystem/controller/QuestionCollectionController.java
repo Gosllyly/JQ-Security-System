@@ -35,14 +35,14 @@ public class QuestionCollectionController {
     }
 
     @PostMapping("/add")
-    public WebResult addCrowdManage(Integer userId,Integer questionId) {
-        questionCollectionService.collection(userId,questionId);
+    public WebResult addCrowdManage(@RequestBody QuestionCollection questionCollection) {
+        questionCollectionService.collection(questionCollection);
         return WebResult.ok().message("收藏题目成功");
     }
 
     @DeleteMapping("/delete")
     public WebResult deleteCategory(@RequestBody QuestionCollection questionCollection) {
-        questionCollectionService.removeById(questionCollection);
+        questionCollectionService.removeCollection(questionCollection);
         return WebResult.ok().message("删除成功");
     }
 

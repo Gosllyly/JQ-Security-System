@@ -1,5 +1,6 @@
 package com.jqmk.examsystem.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -34,5 +35,6 @@ public class ExamLearnScore {
     /**
      * 考试完成时间（获取学分的时间）
      */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
     private LocalDateTime endTime;
 }

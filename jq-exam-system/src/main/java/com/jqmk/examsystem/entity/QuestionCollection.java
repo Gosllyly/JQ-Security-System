@@ -33,6 +33,7 @@ public class QuestionCollection implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    private Integer userId;
     /**
      * 问题id
      */
@@ -71,6 +72,4 @@ public class QuestionCollection implements Serializable {
     private String analysis;
 
     private LocalDateTime collectionTime;
-
-
 }

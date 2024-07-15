@@ -45,7 +45,7 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
     @Resource
     private QuestionMapper questionMapper;
     @Override
-    public void importData(MultipartFile file, Integer questionBankId) {
+    public void importData(MultipartFile file,Integer questionBankId)  {
         long startTime = System.currentTimeMillis();
         List<QuestionAdd> questionList = new ArrayList<>();
 

@@ -90,24 +90,19 @@ public interface QuestionMapper extends BaseMapper<Question> {
             "and (#{type} IS NULL OR type = #{type}) ")
     Integer countErrorQuestionCondition(Integer userId, Integer type, String stem);
 
-    @Select("select COUNT(stem) from question where type = 1 and status = 0 and question_bank_id = #{question_bank_id} ")
+    @Select("select COUNT(DISTINCT stem) from question where type = 1 and status = 0 and question_bank_id = #{question_bank_id} ")
     Integer countSingleChoiceQuestionByBankId(Integer question_bank_id);
 
-    @Select("select COUNT(stem) from question where type = 2 and status = 0 and question_bank_id = #{question_bank_id} ")
+    @Select("select COUNT(DISTINCT stem) from question where type = 2 and status = 0 and question_bank_id = #{question_bank_id} ")
     Integer countMultiChoiceQuestionByBankId(Integer question_bank_id);
 
-    @Select("select COUNT(stem) from question where type = 3 and status = 0 and question_bank_id = #{question_bank_id} ")
+    @Select("select COUNT(DISTINCT stem) from question where type = 3 and status = 0 and question_bank_id = #{question_bank_id} ")
     Integer countJudgeQuestionByBankId(Integer question_bank_id);
+
 
     @Select("SELECT COUNT(*) FROM question WHERE stem = #{stem} AND JSON_CONTAINS(OPTIONS, #{options})  AND question_bank_id = #{bankId}")
     int countByStemAndOptions(String stem, String options, Integer bankId);
 
-//    @Results({
-//            @Result(property = "stem", column = "stem"),
-//            @Result(property = "options", column = "options",typeHandler = JsonTypeHandler.class)
-//    })
-//    @Select("SELECT stem, options FROM question WHERE question_bank_id = #{bankId}")
-//    List<Question> selectByBankId(Integer bankId);
     @Select("SELECT CONCAT(stem, options) as combined FROM question WHERE question_bank_id = #{bankId}")
     List<String> selectCombinedByBankId(Integer bankId);
 }

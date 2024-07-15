@@ -8,11 +8,7 @@ import com.jqmk.examsystem.dto.TestPaperDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.*;
 import com.jqmk.examsystem.mapper.*;
-import com.jqmk.examsystem.service.ExamCrowdManageService;
-import com.jqmk.examsystem.service.TestPaperQuestionService;
-import com.jqmk.examsystem.service.TestPaperService;
-import com.jqmk.examsystem.service.UserService;
-import com.jqmk.examsystem.service.impl.QuestionServiceImpl;
+import com.jqmk.examsystem.service.*;
 import com.jqmk.examsystem.utils.StringsUtil;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -53,7 +49,9 @@ public class TestPaperController {
     @Resource
     private TestPaperQuestionService testPaperQuestionService;
     @Resource
-    private QuestionServiceImpl questionService;
+    private QuestionMapper questionMapper;
+    @Resource
+    private QuestionService questionService;
 
 
     @GetMapping("/main")
@@ -96,7 +94,7 @@ public class TestPaperController {
 
     @PostMapping("/update")
     public WebResult updateTestPaperRuler(@RequestBody TestPaper testPaper) {
-        //判断各个题型数量设置是否合法
+//判断各个题型数量设置是否合法
         if(!questionService.ifQuestionCountIsLegal(testPaper)){
             return WebResult.fail().message("错误信息！");
         }
@@ -154,13 +152,13 @@ public class TestPaperController {
      * @return
      */
     @GetMapping("/myExam")
-    public WebResult selectMyExam(@RequestParam Integer userId) {
+    public WebResult selectMyExam(@RequestParam Integer userId,@RequestParam Integer noChallenge) {
         User user =  userMapper.selectById(userId);
         return WebResult.ok().data(testPaperMapper.selectMaps(new QueryWrapper<TestPaper>()
                 .select("id","name","duration","pass_score","start_time","end_time","single_choice_num",
                         "single_choice_score","multi_choice_num","multi_choice_score","judge_choice_num","judge_choice_score")
                 .eq( "status", 0)
-                .eq("no_challenge",0)
+                .eq("no_challenge",noChallenge)
                 .like("exam_crowd_ids",user.getUsername())));
     }
 

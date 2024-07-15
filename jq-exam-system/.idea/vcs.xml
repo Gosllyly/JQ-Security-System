@@ -2,7 +2,5 @@
 <project version="4">
   <component name="VcsDirectoryMappings">
     <mapping directory="$PROJECT_DIR$/.." vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/JQ-Security-System" vcs="Git" />
-    <mapping directory="$PROJECT_DIR$/MyQQ" vcs="Git" />
   </component>
 </project>

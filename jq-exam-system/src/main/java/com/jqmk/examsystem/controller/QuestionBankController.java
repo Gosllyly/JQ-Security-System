@@ -87,7 +87,7 @@ public class QuestionBankController {
 
     @PostMapping("/addQuestion")
     public WebResult addQuestion(@RequestBody Question questionInfo) {
-         //检查题目是否已经存在
+        //检查题目是否已经存在
         String stem = questionInfo.getStem();
         JSONObject options = questionInfo.getOptions();
         Integer questionBankId = questionInfo.getQuestionBankId();

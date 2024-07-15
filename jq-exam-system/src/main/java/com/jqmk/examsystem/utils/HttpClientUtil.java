@@ -2,13 +2,13 @@ package com.jqmk.examsystem.utils;
 
 import com.jqmk.examsystem.errors.ErrorCodeEnum;
 import com.jqmk.examsystem.exception.BizException;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.GetMethod;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.StatusLine;
-import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -30,7 +30,9 @@ import org.apache.http.ssl.TrustStrategy;
 import org.apache.http.util.EntityUtils;
 
 import javax.net.ssl.SSLContext;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
@@ -41,14 +43,15 @@ import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Base64;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * @ClassName HttpClientUtil
  * @Author tian
- * @Date 2024/6/5 13:55
- * @Description http 请求处理工具类，不论是 get 还是 post 请求，返回值均为 String
+ * @Date 2024/7/12 13:43
+ * @Description http 请求处理工具类
  */
 @Slf4j
 public class HttpClientUtil {
@@ -136,12 +139,12 @@ public class HttpClientUtil {
      * @param headers
      * @return
      */
-    public static String httpGetRequestWithHeaders(String url, Map<String, Object> headers) {
+    public static String httpGetImage(String url, Pair<String,String>... headers) {
         HttpGet httpGet = new HttpGet(url);
-        for (Map.Entry<String, Object> param : headers.entrySet()) {
-            httpGet.addHeader(param.getKey(), String.valueOf(param.getValue()));
+        for (Pair<String,String> header : headers) {
+            httpGet.addHeader(header.getKey(), String.valueOf(header.getValue()));
         }
-        return getResult(httpGet);
+        return getResult(httpGet, ResponseType.IMAGE);
     }
 
     /**
@@ -229,17 +232,6 @@ public class HttpClientUtil {
         }
         return getResult(httpPost);
     }
-
-    public static String httpPostTest(String url, Map<String, Object> headers) {
-        HttpPost httpPost = new HttpPost(url);
-        if (headers != null && headers.size() > 0) {
-            for (Map.Entry<String, Object> param : headers.entrySet()) {
-                httpPost.addHeader(param.getKey(), String.valueOf(param.getValue()));
-            }
-        }
-        return getResult(httpPost);
-    }
-
     /**
      * post 请求，body 部分进行了 url 编码、自定义 header
      *
@@ -270,26 +262,42 @@ public class HttpClientUtil {
         return pairs;
     }
 
+    private static String getResult(HttpRequestBase request){
+        return getResult(request, ResponseType.TEXT);
+    }
     /**
      * 处理Http请求，返回值统一使用 String 格式，调用方根据需要转为 Json -> Object
      *
      * @param request
      * @return
      */
-    private static String getResult(HttpRequestBase request) {
+    private static String getResult(HttpRequestBase request, ResponseType responseType) {
         CloseableHttpClient httpClient = getHttpClient();
-        try {
-            CloseableHttpResponse response = httpClient.execute(request);
+        try(CloseableHttpResponse response = httpClient.execute(request)) {
             StatusLine statusLine = response.getStatusLine();
             int statusCode = statusLine.getStatusCode();
+            HttpEntity entity = response.getEntity();
             if (statusCode == 200) {
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-                    // long len = entity.getContentLength();// -1 表示长度未知
-                    String result = EntityUtils.toString(entity);
-                    response.close();
-                    // httpClient.close();
-                    return result;
+                if (!Objects.isNull(entity)){
+                    switch (responseType) {
+                        case TEXT:
+                            return EntityUtils.toString(entity);
+                        case IMAGE:
+                            InputStream io = entity.getContent();
+                            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                            byte[] buffer = new byte[1024];
+                            int num = io.read(buffer);
+                            while (num != -1) {
+                                baos.write(buffer, 0, num);
+                                num = io.read(buffer);
+                            }
+                            baos.flush();
+                            //返回Base64编码过的字节数组字符串
+                            String s = Base64.getEncoder().encodeToString(baos.toByteArray());
+                            baos.close();
+                            return s;
+                    }
+
                 }
             } else {
                 log.info("请求失败，url = {}, response_code = {}, reason = {}", request.getURI(), statusCode, statusLine.getReasonPhrase());
@@ -298,58 +306,14 @@ public class HttpClientUtil {
 
         } catch (IOException e) {
             log.info("请求失败，url = {}", request.getURI(), e);
+            throw new IllegalStateException(e);
         }
-        return EMPTY_STR;
-    }
-    final static int TIMEOUT = 1000;
-
-    final static int TIMEOUT_MSEC = 5 * 1000;
-    public static String doPost(String url, Map<String, String> paramMap) throws IOException {
-        // 创建Httpclient对象
-        CloseableHttpClient httpClient = HttpClients.createDefault();
-        CloseableHttpResponse response = null;
-        String resultString = "";
-
-        try {
-            // 创建Http Post请求
-            HttpPost httpPost = new HttpPost(url);
-
-            // 创建参数列表
-            if (paramMap != null) {
-                List<NameValuePair> paramList = new ArrayList<>();
-                for (Map.Entry<String, String> param : paramMap.entrySet()) {
-                    paramList.add(new BasicNameValuePair(param.getKey(), param.getValue()));
-                }
-                // 模拟表单
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(paramList);
-                httpPost.setEntity(entity);
-            }
-
-            httpPost.setConfig(builderRequestConfig());
-
-            // 执行http请求
-            response = httpClient.execute(httpPost);
-
-            resultString = EntityUtils.toString(response.getEntity(), "UTF-8");
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            try {
-                response.close();
-            } catch (IOException e) {
-                throw e;
-            }
-        }
-
-        return resultString;
+        return null;
     }
 
-    private static RequestConfig builderRequestConfig() {
-        return RequestConfig.custom()
-                .setConnectTimeout(TIMEOUT_MSEC)
-                .setConnectionRequestTimeout(TIMEOUT_MSEC)
-                .setSocketTimeout(TIMEOUT_MSEC).build();
+    enum ResponseType{
+        TEXT,
+        IMAGE;
     }
 }
-
 

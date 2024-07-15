@@ -31,7 +31,7 @@ public class ChallengeTestController {
     @GetMapping("/main")
     public WebResult viewMain() {
         List<TestPaper> testPaperList = testPaperMapper.selectList(new QueryWrapper<TestPaper>()
-                .select("id","name","pass_score","start_time","end_time","status","exam_introduce")
+                .select("id","name","pass_score","duration","start_time","end_time","status","exam_introduce")
                 .eq("no_challenge",1).orderByDesc("update_time"));
         return WebResult.ok().data(BeanUtil.copyToList(testPaperList, TestPaperChallengeDto.class));
     }

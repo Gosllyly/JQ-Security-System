@@ -7,6 +7,7 @@ import com.jqmk.examsystem.service.QuestionCollectionService;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.HashMap;
 
 /**
  * <p>
@@ -23,7 +24,20 @@ public class QuestionCollectionServiceImpl extends ServiceImpl<QuestionCollectio
     private QuestionCollectionMapper questionCollectionMapper;
 
     @Override
-    public void collection(Integer userId, Integer questionId) {
-        questionCollectionMapper.addCollection(userId,questionId);
+    public void collection(QuestionCollection questionCollection) {
+        questionCollectionMapper.addCollection(questionCollection.getUserId(),questionCollection.getQuestionId());
     }
+
+    @Override
+    public void removeCollection(QuestionCollection questionCollection) {
+        if (questionCollection.getId()!=null) {
+            questionCollectionMapper.deleteById(questionCollection.getId());
+        }else {
+            HashMap<String,Object> map = new HashMap<>();
+            map.put("user_id",questionCollection.getUserId());
+            map.put("question_id",questionCollection.getQuestionId());
+            questionCollectionMapper.deleteByMap(map);
+        }
+    }
+
 }

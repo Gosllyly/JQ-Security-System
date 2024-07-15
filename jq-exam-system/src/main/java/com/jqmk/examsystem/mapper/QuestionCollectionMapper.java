@@ -18,5 +18,5 @@ public interface QuestionCollectionMapper extends BaseMapper<QuestionCollection>
 
     @Select("INSERT INTO question_collection(user_id,question_id,question_bank_name,type,stem,options,correct_options,analysis) " +
             "SELECT #{userId},q.id,qb.bank_name,q.type,q.stem,q.options,q.correct_options,q.analysis FROM question as q,question_bank as qb WHERE q.id=#{questionId} and q.question_bank_id=qb.id")
-    void addCollection(Integer userId, Integer questionId);
+    void addCollection(Integer userId, Long questionId);
 }
