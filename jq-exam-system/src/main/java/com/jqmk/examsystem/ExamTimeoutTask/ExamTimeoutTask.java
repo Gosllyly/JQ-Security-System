@@ -33,7 +33,8 @@ public class ExamTimeoutTask {
             Integer record_id = id.intValue();
             Integer learningScore = 0;
             Integer learningTime = 0;
-            examInfoSummaryMapper.updateTestPaper(record_id,learningScore,learningTime,2);//记为不合格
+            //记为不合格
+            examInfoSummaryMapper.updateTestPaper(record_id,learningScore,learningTime,2);
         }
     }
 
