@@ -35,7 +35,6 @@ public class ExamTimeoutTask {
             Integer learningTime = 0;
             //记为不合格
             examInfoSummaryMapper.updateTestPaper(record_id,learningScore,learningTime,2);
-
         }
     }
 
