@@ -19,6 +19,7 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -147,11 +148,16 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         // 将数据写入 Excel 文件
         for (ExamLearnScore record : records) {
             Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(record.getName());
+            row.createCell(0).setCellValue(record.getUsername());
             row.createCell(1).setCellValue(record.getDeptName());
             row.createCell(2).setCellValue(record.getName());
             row.createCell(3).setCellValue(record.getObtainLearningScore());
-            row.createCell(4).setCellValue(record.getEndTime());
+            // 创建一个DateTimeFormatter对象
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+            // 在设置单元格值之前对时间进行格式化
+            String formattedDate = record.getEndTime().format(dtf);
+            row.createCell(4).setCellValue(formattedDate);
         }
 
         return workbook;
