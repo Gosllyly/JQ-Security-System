@@ -10,6 +10,7 @@ import com.jqmk.examsystem.entity.*;
 import com.jqmk.examsystem.mapper.*;
 import com.jqmk.examsystem.service.*;
 import com.jqmk.examsystem.utils.StringsUtil;
+import com.jqmk.examsystem.utils.TestPaperUtil;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,13 +76,9 @@ public class TestPaperController {
             return WebResult.fail().message("错误信息！");
         }
         // 验证单选题、多选题和判断题的分数总和是否等于 100 分
-        int totalScore = testPaper.getSingleChoiceScore() * testPaper.getSingleChoiceNum()
-                + testPaper.getMultiChoiceScore() * testPaper.getMultiChoiceNum()
-                + testPaper.getJudgeChoiceScore() * testPaper.getJudgeChoiceNum();
-        if (totalScore != 100) {
+        if(!TestPaperUtil.ifSumLegal(testPaper)){
             return WebResult.fail().message("创建失败！分值总和应为100");
         }
-
         testPaper.setNoChallenge(0);
 
         List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
@@ -99,10 +96,7 @@ public class TestPaperController {
             return WebResult.fail().message("错误信息！");
         }
         // 验证单选题、多选题和判断题的分数总和是否等于 100 分
-        int totalScore = testPaper.getSingleChoiceScore() * testPaper.getSingleChoiceNum()
-                + testPaper.getMultiChoiceScore() * testPaper.getMultiChoiceNum()
-                + testPaper.getJudgeChoiceScore() * testPaper.getJudgeChoiceNum();
-        if (totalScore != 100) {
+        if(!TestPaperUtil.ifSumLegal(testPaper)){
             return WebResult.fail().message("更新失败！分值总和应为100");
         }
 

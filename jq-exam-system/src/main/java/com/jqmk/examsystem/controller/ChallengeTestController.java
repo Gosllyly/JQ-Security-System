@@ -7,6 +7,7 @@ import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.TestPaper;
 import com.jqmk.examsystem.mapper.TestPaperMapper;
 import com.jqmk.examsystem.service.TestPaperService;
+import com.jqmk.examsystem.utils.TestPaperUtil;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -43,6 +44,10 @@ public class ChallengeTestController {
     }
     @PostMapping("/add")
     public WebResult addTestPaperRuler(@RequestBody TestPaper testPaper) {
+        // 验证单选题、多选题和判断题的分数总和是否等于 100 分
+        if(!TestPaperUtil.ifSumLegal(testPaper)){
+            return WebResult.fail().message("创建失败！分值总和应为100");
+        }
         testPaper.setExamCategoryId(0);
         testPaper.setNoChallenge(1);
         testPaperService.save(testPaper);
@@ -51,6 +56,10 @@ public class ChallengeTestController {
 
     @PostMapping("/update")
     public WebResult updateTestPaperRuler(@RequestBody TestPaper testPaper) {
+        // 验证单选题、多选题和判断题的分数总和是否等于 100 分
+        if(!TestPaperUtil.ifSumLegal(testPaper)){
+            return WebResult.fail().message("更新失败！分值总和应为100");
+        }
         testPaper.setExamCategoryId(0);
         testPaper.setUpdateTime(LocalDateTime.now());
         testPaperService.updateById(testPaper);
