@@ -213,6 +213,7 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         headerRow.createCell(4).setCellValue("实际获取学时");
         headerRow.createCell(5).setCellValue("获取时间");
 
+
         // 将数据写入 Excel 文件
         for (ExamLearnTime record : records) {
             Row row = sheet.createRow(rowNum++);
@@ -221,7 +222,12 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
             row.createCell(2).setCellValue(record.getName());
             row.createCell(3).setCellValue(record.getLearningTime());
             row.createCell(4).setCellValue(record.getObtainLearningTime());
-            row.createCell(5).setCellValue(record.getEndTime());
+            // 创建一个DateTimeFormatter对象
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+            // 在设置单元格值之前对时间进行格式化
+            String formattedDate = record.getEndTime().format(dtf);
+            row.createCell(5).setCellValue(formattedDate);
         }
 
         return workbook;
