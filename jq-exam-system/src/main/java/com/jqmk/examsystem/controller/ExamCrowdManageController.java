@@ -4,6 +4,7 @@ package com.jqmk.examsystem.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jqmk.examsystem.dto.ExamCrowdManageDto;
+import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.ExamCrowdManage;
 import com.jqmk.examsystem.entity.User;
@@ -71,9 +72,9 @@ public class ExamCrowdManageController {
         return WebResult.ok().data(distinct);
     }
 
-    @GetMapping("/selectPeoples")
-    public WebResult selectPeoples(String includeDeptCodes, String includeJobType, String name) {
-        List<String> users = userService.selectUsersByNames(includeDeptCodes,includeJobType,name);
+    @PostMapping ("/selectPeoples")
+    public WebResult selectPeoples(@RequestBody SelectPeoplesDto selectPeoplesDto) {
+        List<String> users = userService.selectUsersByNames(selectPeoplesDto);
         return WebResult.ok().data(users);
     }
 

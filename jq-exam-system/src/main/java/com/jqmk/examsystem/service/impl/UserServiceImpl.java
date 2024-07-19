@@ -2,6 +2,7 @@ package com.jqmk.examsystem.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.mapper.UserMapper;
 import com.jqmk.examsystem.service.UserService;
@@ -51,10 +52,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<String> selectUsersByNames(String includeDeptCodes, String includeJobType, String name) {
-        String deptNames = StringsUtil.arrayToString(includeDeptCodes);
-        String jobTypes = StringsUtil.arrayToString(includeJobType);
-        List<String> usernames= userMapper.selectByCondition(deptNames,jobTypes,name);
-        return usernames;
+    public List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto) {
+        String deptNames = StringsUtil.arrayToString(selectPeoplesDto.getIncludeDeptCodes().toString());
+        if (selectPeoplesDto.getIncludeJobType()==null) {
+            List<String> userList = userMapper.selectByConditionOR(deptNames,selectPeoplesDto.getName());
+            return userList;
+        }else {
+            String jobTypes = StringsUtil.arrayToStr(selectPeoplesDto.getIncludeJobType().toString());
+            List<String> userList = userMapper.selectByCondition(deptNames,jobTypes,selectPeoplesDto.getName());
+            return userList;
+        }
     }
 }

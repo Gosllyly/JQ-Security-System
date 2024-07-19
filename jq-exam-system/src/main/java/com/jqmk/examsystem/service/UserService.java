@@ -1,6 +1,7 @@
 package com.jqmk.examsystem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.entity.User;
 
 import java.util.List;
@@ -18,5 +19,5 @@ public interface UserService extends IService<User> {
 
     Map<String, Object> login(String userName, String password);
 
-    List<String> selectUsersByNames(String includeDeptCodes,String includeJobType,String name);
+    List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto);
 }

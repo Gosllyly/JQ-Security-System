@@ -18,9 +18,12 @@ import java.util.List;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("SELECT username FROM user WHERE (#{deptNames} IS NULL OR dept_name RLIKE #{deptNames}) " +
-            "and (#{jobTypes} IS NULL OR job_type RLIKE #{jobTypes}) and (#{name} IS NULL OR username like '${name}%')")
+    @Select("SELECT username FROM user WHERE (#{jobTypes} IS NULL OR job_type in (${jobTypes})) AND (#{deptNames} IS NULL OR `dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR username LIKE '${name}%')")
     List<String> selectByCondition(String deptNames,String jobTypes,String name);
+    @Select("SELECT username FROM user WHERE (#{deptNames} IS NULL OR `dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR username LIKE '${name}%')")
+    List<String> selectByConditionOR(String deptNames,String name);
 
     @Update("UPDATE user " +
             "set " +
@@ -30,11 +33,12 @@ public interface UserMapper extends BaseMapper<User> {
             "card_no = #{cardNo}," +
             "job_type = #{jobType}," +
             "employee_id = #{employeeId}," +
+            "img_file = #{imgFile}," +
             "create_date = #{createDate} " +
             "where id_card = #{idCard}")
-    void updateUser(String username, String deptName, String idCard, Integer cardNo, String employeeId, String jobType, LocalDateTime createDate);
+    void updateUser(String username, String deptName, String idCard, Integer cardNo, String employeeId, String jobType,String imgFile, LocalDateTime createDate);
 
-    @Insert("INSERT INTO user (username,dept_name,id_card,card_no,employee_id,job_type,create_date) " +
+    @Insert("INSERT INTO user (username,dept_name,id_card,card_no,employee_id,job_type,img_file,create_date) " +
             "VALUES (" +
             "#{user.username}, " +
             "#{user.deptName}, " +
@@ -42,6 +46,7 @@ public interface UserMapper extends BaseMapper<User> {
             "#{user.cardNo}, " +
             "#{user.employeeId}, " +
             "#{user.jobType}, " +
+            "#{user.imgFile}, " +
             "#{user.createDate}) ")
     void insertUser(@Param("user") User user);
 

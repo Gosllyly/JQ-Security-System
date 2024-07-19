@@ -9,6 +9,7 @@ import com.jqmk.examsystem.dto.mas.MasPersonResBody;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.mapper.UserMapper;
 import com.jqmk.examsystem.utils.HttpClientUtil;
+import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.stereotype.Component;
@@ -75,6 +76,8 @@ public class TimedTask {
                 // 没有 idCard 的员工信息不同步
                 if (person.getIDCard() == null || person.getIDCard().length() == 0)
                     continue;
+                String imageUrl = masInteractiveConfig.getServiceAddress() + person.getImgFile();
+                String image = person.getImgFile() == null ? null : HttpClientUtil.httpGetImage(imageUrl, new Pair<>("token", token));
                 User user = User.builder()
                         .username(person.getName())
                         .idCard(person.getIDCard())
@@ -82,6 +85,7 @@ public class TimedTask {
                         .jobType(person.getWorkName())
                         .cardNo(person.getCardNo())
                         .employeeId(person.getEmployee())
+                        .imgFile(image)
                         .createDate(person.getUpdatedTime())
                         .build();
                 User old = userMapper.selectByCardNoAndName(user.getIdCard(), user.getUsername());
@@ -90,7 +94,7 @@ public class TimedTask {
                 if (old == null) {
                     userMapper.insertUser(user);
                 } else if (!old.equals(user)) {
-                    userMapper.updateUser(user.getUsername(), user.getDeptName(), user.getIdCard(), user.getCardNo(), user.getEmployeeId(), user.getJobType(), user.getCreateDate());
+                    userMapper.updateUser(user.getUsername(), user.getDeptName(), user.getIdCard(), user.getCardNo(), user.getEmployeeId(), user.getJobType(),user.getImgFile(), user.getCreateDate());
                 }
             }
             log.info("同步完成第 {} 页", pageIndex);

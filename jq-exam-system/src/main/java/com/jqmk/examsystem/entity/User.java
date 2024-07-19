@@ -45,6 +45,7 @@ public class User implements Serializable {
 
     private String deptName;
     private String employeeId;
+    private String imgFile;
     @TableLogic
     private Integer deleteFlag;
 

@@ -36,9 +36,49 @@ public class StringsUtil {
     }
     public static String arrayToString(String str) {
         if (str!=null) {
-            String newStr = str.replace("\", \"", "|");
-            String newStr1 = newStr.replace("[\"", "");
-            String newStr2 = newStr1.replace("\"]", "");
+            String newStr = str.replace(",", "|");
+            String newStr1 = newStr.replace("[", "");
+            String newStr2 = newStr1.replace("]", "");
+            return newStr2;
+        }else {
+            return null;
+        }
+    }
+    public static String arrayToStr(String str) {
+        if (str!=null) {
+            String newStr = str.replace(", ", "\",\"");
+            String newStr1 = newStr.replace("[", "\"");
+            String newStr2 = newStr1.replace("]", "\"");
+            return newStr2;
+        }else {
+            return null;
+        }
+    }
+    public static StringBuilder strAdd(String str) {
+        if (str!=null) {
+            String newStr = str.replace(",", "\",\"");
+            List<String> list = new ArrayList<>(Arrays.asList(newStr));
+            StringBuilder sb = new StringBuilder();
+            sb.append("\"");
+            int seq = 1;
+            for (String s : list) {
+
+                sb.append(s);
+                if (seq++ != list.size()){
+                    sb.append(",");
+                }
+            }
+            sb.append("\"");
+            return sb;
+        }else {
+            return null;
+        }
+    }
+    public static String strTolist(String str) {
+        if (str!=null) {
+            String newStr = str.replace(", ", ",");
+            String newStr1 = newStr.replace("[", "");
+            String newStr2 = newStr1.replace("]", "");
             return newStr2;
         }else {
             return null;
@@ -58,8 +98,7 @@ public class StringsUtil {
         if (str!=null) {
             String newStr = str.replace("[", "");
             String newStr1 = newStr.replace("]", "");
-            String newStr2 = newStr1.replace(" ", "");
-            return newStr2;
+            return newStr1;
         }else {
             return null;
         }
