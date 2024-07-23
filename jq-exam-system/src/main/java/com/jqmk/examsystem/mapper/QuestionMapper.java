@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jqmk.examsystem.dto.ExamInfoSummaryDto;
 import com.jqmk.examsystem.dto.ExamQuestion;
 import com.jqmk.examsystem.dto.WrongQuestion;
+import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.framwork.config.JsonTypeHandler;
 import org.apache.ibatis.annotations.*;
@@ -105,4 +106,11 @@ public interface QuestionMapper extends BaseMapper<Question> {
 
     @Select("SELECT CONCAT(stem, options) as combined FROM question WHERE question_bank_id = #{bankId}")
     List<String> selectCombinedByBankId(Integer bankId);
+
+//    @Results({
+//            @Result(property = "options", column = "options", typeHandler = JsonTypeHandler.class),
+//            @Result(property = "correctOptions", column = "correct_options", typeHandler = JsonTypeHandler.class),
+//    })
+    @Select("select stem,options,correct_options,analysis,type,status from question WHERE  question_bank_id = #{questionBankId}")
+    List<ExportQuestion> selectByBankId(Integer questionBankId);
 }

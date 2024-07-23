@@ -2,8 +2,12 @@ package com.jqmk.examsystem.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.TestPaper;
+
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * <p>
@@ -24,4 +28,6 @@ public interface QuestionService extends IService<Question> {
     void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary,String wrong,Integer userId);
 
     boolean ifQuestionCountIsLegal(TestPaper testPaper);
+
+    String selectByBankId(Integer questionBankId,HttpServletResponse response);
 }

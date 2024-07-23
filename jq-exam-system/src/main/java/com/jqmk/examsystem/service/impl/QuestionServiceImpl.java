@@ -1,9 +1,13 @@
 package com.jqmk.examsystem.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.TestPaper;
 import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
@@ -14,6 +18,10 @@ import com.jqmk.examsystem.utils.StringsUtil;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <p>
@@ -99,5 +107,48 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             return false;
         }
         return true;
+    }
+
+    @Override
+    public String selectByBankId(Integer questionBankId,HttpServletResponse response) {
+        List<Question> questionList = questionMapper.selectList(new QueryWrapper<Question>().eq("question_bank_id",questionBankId));
+        List<ExportQuestion> exportQuestionList = new ArrayList<>();
+        for (Question ech : questionList) {
+            ExportQuestion exportQuestion = new ExportQuestion();
+            exportQuestion.setStem(ech.getStem());
+            exportQuestion.setOptions(StringsUtil.jsonToStr(ech.getOptions().toString()));
+            System.out.println(ech.getCorrectOptions().toString());
+            System.out.println(StringsUtil.StingToStr(ech.getCorrectOptions().toString()));
+            exportQuestion.setCorrectOptions(StringsUtil.StingToStr(ech.getCorrectOptions().toString()));
+            exportQuestion.setType(ech.getType());
+            exportQuestion.setAnalysis(ech.getAnalysis());
+            exportQuestion.setStatus(conventStatus(ech.getStatus()));
+            exportQuestionList.add(exportQuestion);
+        }
+        try {
+            this.setExcelResponseProp(response);
+            EasyExcel.write(response.getOutputStream())
+                    .head(ExportQuestion.class)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .sheet("题库")
+                    .doWrite(exportQuestionList);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return "success";
+    }
+    private void setExcelResponseProp(HttpServletResponse response) {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-disposition", "attachment; filename=question_bank.xlsx");
+    }
+    public String conventStatus(Integer Statue) {
+        String questionStatue = null;
+        if (Statue==0) {
+            questionStatue="启用";
+        }else {
+            questionStatue="禁用";
+        }
+        return questionStatue;
     }
 }

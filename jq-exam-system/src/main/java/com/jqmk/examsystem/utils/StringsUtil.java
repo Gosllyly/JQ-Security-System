@@ -164,6 +164,27 @@ public class StringsUtil {
             return null;
         }
     }
+    public static String jsonToStr(String str) {
+        if (str!=null) {
+            String newStr = str.replace("{\"", "");
+            String newStr1 = newStr.replace("\"}", "");
+            String newStr2 = newStr1.replace("\"", "");
+            String newStr3 = newStr2.replace(",", "\n");
+            return newStr3;
+        }else {
+            return null;
+        }
+    }
+    public static String StingToStr(String str) {
+        if (str!=null) {
+            String newStr = str.replace("[", "");
+            String newStr1 = newStr.replace("]", "");
+            String newStr2 = newStr1.replace(", ", "\n");
+            return newStr2;
+        }else {
+            return null;
+        }
+    }
     public static String removeWhitespace(String str) {
         if (str == null) {
             return null;

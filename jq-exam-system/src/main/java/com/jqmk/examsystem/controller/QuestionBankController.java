@@ -1,10 +1,15 @@
 package com.jqmk.examsystem.controller;
 
 
+import cn.hutool.core.bean.BeanUtil;
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.jqmk.examsystem.dto.ExamCategoryDto;
 import com.jqmk.examsystem.dto.WebResult;
+import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.QuestionBank;
 import com.jqmk.examsystem.mapper.QuestionMapper;
@@ -18,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -73,18 +80,9 @@ public class QuestionBankController {
     }
 
     @GetMapping ("/exportQuestionBank")
-    public WebResult exportQuestionBank(@RequestParam Integer questionBankId, HttpServletResponse response) throws IOException {
-        List<Question> questionList = questionBankService.exportQuestionBank(questionBankId);
-        // 使用ExportService创建并填充Excel文件
-        XSSFWorkbook workbook = questionBankService.createExcel(questionList,questionBankId);
-        // 将Excel文件作为响应发送给客户端
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=bank.xlsx");
-        workbook.write(response.getOutputStream());
-        workbook.close();
-        return WebResult.ok().message("导出成功");
+    public void exportQuestionBank(@RequestParam Integer questionBankId, HttpServletResponse response) {
+        questionService.selectByBankId(questionBankId,response);
     }
-
     @PostMapping("/addQuestion")
     public WebResult addQuestion(@RequestBody Question questionInfo) {
         //检查题目是否已经存在
