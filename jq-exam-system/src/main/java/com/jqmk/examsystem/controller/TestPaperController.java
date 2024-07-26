@@ -50,8 +50,6 @@ public class TestPaperController {
     @Resource
     private TestPaperQuestionService testPaperQuestionService;
     @Resource
-    private QuestionMapper questionMapper;
-    @Resource
     private QuestionService questionService;
 
 
@@ -91,7 +89,7 @@ public class TestPaperController {
 
     @PostMapping("/update")
     public WebResult updateTestPaperRuler(@RequestBody TestPaper testPaper) {
-//判断各个题型数量设置是否合法
+        //判断各个题型数量设置是否合法
         if(!questionService.ifQuestionCountIsLegal(testPaper)){
             return WebResult.fail().message("错误信息！");
         }

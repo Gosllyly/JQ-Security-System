@@ -60,17 +60,9 @@ public class ChallengeResultController {
      * 同上缺少对答题情况的判断和插入，目前只返回姓名，时间，总分数，结果
      */
     @GetMapping ("/exportAll")
-    public WebResult exportQuestionBank(@RequestParam(required = false) Integer userId, HttpServletResponse response) throws IOException {
+    public void exportQuestionBank(@RequestParam(required = false) Integer userId, HttpServletResponse response) throws IOException {
         Integer noChallenge = 1;
-        List<ExamRecordDto> examInfoSummaryList = examInfoSummaryService.exportExamRecord(userId,noChallenge);
-        // 使用ExportService创建并填充Excel文件
-        XSSFWorkbook workbook = examInfoSummaryService.createExcel(examInfoSummaryList);
-        // 将Excel文件作为响应发送给客户端
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=records.xlsx");
-        workbook.write(response.getOutputStream());
-        workbook.close();
-        return WebResult.ok().message("导出成功");
+        examInfoSummaryService.exportExamRecord(userId,noChallenge,response);
     }
 
 }

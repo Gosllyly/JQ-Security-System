@@ -35,16 +35,9 @@ public class ExamLearnScoreController {
     }
 
     @GetMapping ("/exportAll")
-    public WebResult exportLearnScore(HttpServletResponse response) throws IOException {
-        List<ExamLearnScore> examInfoSummaryList = examInfoSummaryService.exportLearnScore();
+    public void exportLearnScore(HttpServletResponse response){
+        examInfoSummaryService.exportLearnScore(response);
         // 使用ExportService创建并填充Excel文件
-        XSSFWorkbook workbook = examInfoSummaryService.createLearnScoreExcel(examInfoSummaryList);
-        // 将Excel文件作为响应发送给客户端
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=LearnScore.xlsx");
-        workbook.write(response.getOutputStream());
-        workbook.close();
-        return WebResult.ok().message("导出成功");
     }
 
     /**

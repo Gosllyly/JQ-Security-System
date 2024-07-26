@@ -35,16 +35,8 @@ public class ExamLearnTimeController {
     }
 
     @GetMapping ("/exportAll")
-    public WebResult exportLearnTime(HttpServletResponse response) throws IOException {
-        List<ExamLearnTime> examLearnTimeList = examInfoSummaryService.exportLearnTime();
-        // 使用ExportService创建并填充Excel文件
-        XSSFWorkbook workbook = examInfoSummaryService.createLearnTimeExcel(examLearnTimeList);
-        // 将Excel文件作为响应发送给客户端
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition", "attachment; filename=LearnTime.xlsx");
-        workbook.write(response.getOutputStream());
-        workbook.close();
-        return WebResult.ok().message("导出成功");
+    public void exportLearnTime(HttpServletResponse response) {
+        examInfoSummaryService.exportLearnTime(response);
     }
 
     /**

@@ -1,8 +1,11 @@
 package com.jqmk.examsystem.service.impl;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.support.ExcelTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.*;
+import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import com.jqmk.examsystem.entity.TestPaperQuestion;
 import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
@@ -19,11 +22,10 @@ import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.time.format.DateTimeFormatter;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -68,52 +70,23 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public List<ExamRecordDto> exportExamRecord(Integer userId,Integer noChallenge) {
+    public void exportExamRecord(Integer userId,Integer noChallenge,HttpServletResponse response) {
         List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.exportAll(userId,noChallenge);
-        return examRecordDtoList;
-    }
-
-    @Override
-    public XSSFWorkbook createExcel(List<ExamRecordDto> records) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet();
-        int rowNum = 0;
-        // 创建表头行并设置字段名
-        Row headerRow = sheet.createRow(rowNum++);
-        headerRow.createCell(0).setCellValue("试卷名称");
-        headerRow.createCell(1).setCellValue("员工姓名");
-        headerRow.createCell(2).setCellValue("部门");
-        headerRow.createCell(3).setCellValue("工种");
-        headerRow.createCell(4).setCellValue("考试时间");
-        headerRow.createCell(5).setCellValue("考试用时");
-        headerRow.createCell(6).setCellValue("答题总数");
-        headerRow.createCell(7).setCellValue("正确数");
-        headerRow.createCell(8).setCellValue("错误数");
-        headerRow.createCell(9).setCellValue("未做数");
-        headerRow.createCell(10).setCellValue("总分");
-        headerRow.createCell(11).setCellValue("成绩");
-        headerRow.createCell(12).setCellValue("考试情况");
-
-
-        // 将数据写入 Excel 文件
-        for (ExamRecordDto record : records) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(record.getName());
-            row.createCell(1).setCellValue(record.getUsername());
-            row.createCell(2).setCellValue(record.getDeptName());
-            row.createCell(3).setCellValue(record.getJobType());
-            row.createCell(4).setCellValue(record.getStartTime());
-            row.createCell(5).setCellValue(record.getUnavailable());
-            row.createCell(6).setCellValue(record.getAnswerCount());
-            row.createCell(7).setCellValue(record.getAnswerCorrect());
-            row.createCell(8).setCellValue(record.getAnswerWrong());
-            row.createCell(9).setCellValue(record.getNoReply());
-            row.createCell(10).setCellValue(100);
-            row.createCell(11).setCellValue(record.getScore());
-            row.createCell(12).setCellValue(conventExamResults(record.getExamResults()));
+        try {
+            this.setExcelRecord(response);
+            EasyExcel.write(response.getOutputStream())
+                    .head(ExamRecordDto.class)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .sheet("考试成绩")
+                    .doWrite(examRecordDtoList);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return workbook;
+    }
+    private void setExcelRecord(HttpServletResponse response) {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-disposition", "attachment; filename=record.xlsx");
     }
 
     @Override
@@ -127,42 +100,24 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public List<ExamLearnScore> exportLearnScore() {
-        List<ExamLearnScore> examInfoSummaryList = examInfoSummaryMapper.viewInterface(0L,Long.MAX_VALUE);
-        return examInfoSummaryList;
-    }
-
-    @Override
-    public XSSFWorkbook createLearnScoreExcel(List<ExamLearnScore> records) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet();
-        int rowNum = 0;
-        // 创建表头行并设置字段名
-        Row headerRow = sheet.createRow(rowNum++);
-        headerRow.createCell(0).setCellValue("员工姓名");
-        headerRow.createCell(1).setCellValue("部门名称");
-        headerRow.createCell(2).setCellValue("获取途径");
-        headerRow.createCell(3).setCellValue("获取分数");
-        headerRow.createCell(4).setCellValue("获取时间");
-
-        // 将数据写入 Excel 文件
-        for (ExamLearnScore record : records) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(record.getUsername());
-            row.createCell(1).setCellValue(record.getDeptName());
-            row.createCell(2).setCellValue(record.getName());
-            row.createCell(3).setCellValue(record.getObtainLearningScore());
-            // 创建一个DateTimeFormatter对象
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-            // 在设置单元格值之前对时间进行格式化
-            String formattedDate = record.getEndTime().format(dtf);
-            row.createCell(4).setCellValue(formattedDate);
+    public void exportLearnScore(HttpServletResponse response) {
+        List<ExamLearnScore> examLearnScoreList = examInfoSummaryMapper.viewInterface(0L,Long.MAX_VALUE);
+        try {
+            this.setExcelScore(response);
+            EasyExcel.write(response.getOutputStream())
+                    .head(ExamLearnScore.class)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .sheet("考试学分")
+                    .doWrite(examLearnScoreList);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-
-        return workbook;
     }
-
+    private void setExcelScore(HttpServletResponse response) {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-disposition", "attachment; filename=score.xlsx");
+    }
     @Override
     public Map<String, Object> selectLearnScore(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize) {
         List<ExamLearnScore>  examLearnScoreList = examInfoSummaryMapper.selectLearnScore(deptName,examCategoryId,username,name,startTime,endTime,(page - 1) * pageSize,pageSize);
@@ -194,43 +149,24 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public List<ExamLearnTime> exportLearnTime() {
+    public void exportLearnTime(HttpServletResponse response) {
         List<ExamLearnTime> examLearnTimes = examInfoSummaryMapper.learnTimeInterface(0L,Long.MAX_VALUE);
-        return examLearnTimes;
+        try {
+            this.setExcelTime(response);
+            EasyExcel.write(response.getOutputStream())
+                    .head(ExamLearnTime.class)
+                    .excelType(ExcelTypeEnum.XLSX)
+                    .sheet("考试学时")
+                    .doWrite(examLearnTimes);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    @Override
-    public XSSFWorkbook createLearnTimeExcel(List<ExamLearnTime> records) {
-        XSSFWorkbook workbook = new XSSFWorkbook();
-        XSSFSheet sheet = workbook.createSheet();
-        int rowNum = 0;
-        // 创建表头行并设置字段名
-        Row headerRow = sheet.createRow(rowNum++);
-        headerRow.createCell(0).setCellValue("员工姓名");
-        headerRow.createCell(1).setCellValue("部门名称");
-        headerRow.createCell(2).setCellValue("获取途径");
-        headerRow.createCell(3).setCellValue("可获取学时");
-        headerRow.createCell(4).setCellValue("实际获取学时");
-        headerRow.createCell(5).setCellValue("获取时间");
-
-
-        // 将数据写入 Excel 文件
-        for (ExamLearnTime record : records) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(record.getName());
-            row.createCell(1).setCellValue(record.getDeptName());
-            row.createCell(2).setCellValue(record.getName());
-            row.createCell(3).setCellValue(record.getLearningTime());
-            row.createCell(4).setCellValue(record.getObtainLearningTime());
-            // 创建一个DateTimeFormatter对象
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-
-            // 在设置单元格值之前对时间进行格式化
-            String formattedDate = record.getEndTime().format(dtf);
-            row.createCell(5).setCellValue(formattedDate);
-        }
-
-        return workbook;
+    private void setExcelTime(HttpServletResponse response) {
+        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+        response.setCharacterEncoding("utf-8");
+        response.setHeader("Content-disposition", "attachment; filename=time.xlsx");
     }
 
     @Override
@@ -275,7 +211,6 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
 
     public Integer insertNewRecord(Integer userId, Integer id, String userAnswer) {
         //传入了问卷的id和用户id，用户答案列表
-        //examInfoSummaryMapper.insertNewRecord(userId,id);
         Integer newId = examInfoSummaryMapper.selectId(userId,id);
         examInfoSummaryMapper.updateUserAnswer(newId,userAnswer);
         return newId;
@@ -304,21 +239,14 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         JSONObject json = new JSONObject(StringsUtil.stringRecom(userAnswer.toString()));
         String a =StringsUtil.listWipe(list.get(list.size()-1).toString());
         List<String> list1= Arrays.asList(a.split(","));
-//        System.out.println("json="+json);
         for (int i = 0; i < list1.size(); i++) {
             //list1.get(i)为问题id，通过问题的id查找对应的正确答案
             String daan = questionMapper.selectCurrent(Integer.valueOf(list1.get(i)));
-//            System.out.println("题号" + list1.get(i));
-//            System.out.println("用户选的" + json.getString(list1.get(i)));
-//            System.out.println("答案" + StringsUtil.stringRecom(daan).replaceAll("\"", ""));
             if (json.getString(list1.get(i)).equals("")) {
-//                System.out.println("======未作答=====");
                 questionMapper.addNoReply(testId);
             } else if (StringsUtil.stringRecom(daan).replaceAll("\"", "").equals(json.getString(list1.get(i)))) {
-//                System.out.println("======答对了=====");
                 questionService.addCurrent(id,testId,list1.get(i),examSummary);
             } else if (!StringsUtil.stringRecom(daan).replaceAll("\"", "").equals(json.getString(list1.get(i)))) {
-//                System.out.println("======答错了=====");
                 questionService.addWrongs(id,testId,list1.get(i),examSummary,json.getString(list1.get(i)),userId);
             }
         }

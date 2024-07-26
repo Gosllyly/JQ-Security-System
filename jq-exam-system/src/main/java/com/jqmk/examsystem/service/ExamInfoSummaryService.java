@@ -7,6 +7,7 @@ import com.jqmk.examsystem.dto.ExamRecordDto;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Map;
 
@@ -24,15 +25,12 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
 
-    List<ExamRecordDto> exportExamRecord(Integer userId,Integer noChallenge);
+    void exportExamRecord(Integer userId, Integer noChallenge, HttpServletResponse response);
 
-    XSSFWorkbook createExcel(List<ExamRecordDto> examRecordDtoList);
 
     Map<String, Object> viewLearnScore(Long page, Long pageSize);
 
-    List<ExamLearnScore> exportLearnScore();
-
-    XSSFWorkbook createLearnScoreExcel(List<ExamLearnScore> examInfoSummaryList);
+    void exportLearnScore(HttpServletResponse response);
 
     Map<String, Object> selectLearnScore(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize);
 
@@ -40,9 +38,8 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     Map<String, Object> viewLearnTime(Long page, Long pageSize);
 
-    List<ExamLearnTime> exportLearnTime();
+    void exportLearnTime(HttpServletResponse response);
 
-    XSSFWorkbook createLearnTimeExcel(List<ExamLearnTime> examLearnTimeList);
 
     Map<String, Object> selectLearnTime(String deptName, String username, String name, Long page, Long pageSize);
 
