@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jqmk.examsystem.dto.ExamLearnScore;
 import com.jqmk.examsystem.dto.ExamLearnTime;
 import com.jqmk.examsystem.dto.ExamRecordDto;
+import com.jqmk.examsystem.dto.export.ExportExamRecord;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
@@ -132,7 +133,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("SELECT ex.id,`user`.username,user.dept_name,user.job_type,ex.`name`,ex.start_time,ex.end_time,ex.score,sum(ar.answer_correct+ar.answer_wrong+ar.no_reply) as answerCount, " +
             "ar.answer_correct,ar.answer_wrong,ar.no_reply,ex.exam_results,timediff(ex.end_time,ex.start_time) as unavailable FROM `user`,test_paper,exam_info_summary as ex,answers_records as ar " +
             "where user.id = ex.user_id and user.id = ar.user_id and test_paper.id = ar.test_paper_id and ex.test_paper_id = ar.test_paper_id and ar.exam_info_summary_id = ex.id and test_paper.no_challenge=#{noChallenge} AND (#{userId} IS NULL OR user.id = #{userId}) GROUP BY ar.id ")
-    List<ExamRecordDto> exportAll(Integer userId,Integer noChallenge);
+    List<ExportExamRecord> exportAll(Integer userId, Integer noChallenge);
 
     @Select("SELECT eis.* " +
             "FROM exam_info_summary eis " +

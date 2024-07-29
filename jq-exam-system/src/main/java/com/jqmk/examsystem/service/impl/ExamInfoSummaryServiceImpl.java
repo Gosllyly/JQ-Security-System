@@ -5,6 +5,7 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.*;
+import com.jqmk.examsystem.dto.export.ExportExamRecord;
 import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import com.jqmk.examsystem.entity.TestPaperQuestion;
@@ -71,11 +72,11 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
 
     @Override
     public void exportExamRecord(Integer userId,Integer noChallenge,HttpServletResponse response) {
-        List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.exportAll(userId,noChallenge);
+        List<ExportExamRecord> examRecordDtoList = examInfoSummaryMapper.exportAll(userId,noChallenge);
         try {
             this.setExcelRecord(response);
             EasyExcel.write(response.getOutputStream())
-                    .head(ExamRecordDto.class)
+                    .head(ExportExamRecord.class)
                     .excelType(ExcelTypeEnum.XLSX)
                     .sheet("考试成绩")
                     .doWrite(examRecordDtoList);
@@ -259,18 +260,5 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         res.put("question", question);
         res.put("answer", examInfoSummaryList);
         return res;
-    }
-
-    public String conventExamResults(Integer examResults) {
-        String results = null;
-        //1代表及格，2不及格，0未参考
-        if (examResults.equals(1)) {
-            results="及格";
-        }else if (examResults.equals(2)) {
-            results="不及格";
-        }else {
-            results="未参考";
-        }
-        return results;
     }
 }

@@ -3,7 +3,7 @@ package com.jqmk.examsystem.dto.export;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ColumnWidth;
 import com.alibaba.excel.annotation.write.style.ContentRowHeight;
-import com.jqmk.examsystem.component.TypeConverter;
+import com.jqmk.examsystem.component.QuestionTypeConverter;
 import lombok.Data;
 
 /**
@@ -45,7 +45,7 @@ public class ExportQuestion {
     /**
      * 问题类型1(单选)，2(多选)，3(判断)
      */
-    @ExcelProperty(value = "问题类型",converter = TypeConverter.class)
+    @ExcelProperty(value = "问题类型",converter = QuestionTypeConverter.class)
     private Integer type;
 
     /**
