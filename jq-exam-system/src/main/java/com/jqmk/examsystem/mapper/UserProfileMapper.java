@@ -55,16 +55,16 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
             "where up.`level`='低风险' and up.username=user.username and to_days(up.creat_time) = to_days(now())")
     Integer countLow();
 
-    @Select("SELECT username,employee_id,level FROM `user_profile_data` where (#{creatTime} IS NULL OR date_format(creat_time,'%Y-%m-%d')=#{creatTime}) and username in (${name}) and level!='数据不足' " +
+    @Select("SELECT username,employee_id,level FROM `user_profile_data` where (#{creatTime} IS NULL OR date_format(creat_time,'%Y-%m-%d')=#{creatTime}) and username in (${name}) and level!='null' " +
             "order by field(level,\"高风险\",\"中风险\",\"低风险\") limit #{page},#{pageSize}")
     List<UserProfileDetailDto> selectByTimeOrName(String creatTime, String name, Long page, Long pageSize);
 
-    @Select("SELECT username,employee_id,level FROM `user_profile_data` where date_format(creat_time,'%Y-%m-%d')=#{creatTime} and level!='数据不足' " +
+    @Select("SELECT username,employee_id,level FROM `user_profile_data` where date_format(creat_time,'%Y-%m-%d')=#{creatTime} and level!='null' " +
             "order by field(level,\"高风险\",\"中风险\",\"低风险\") limit #{page},#{pageSize}")
     List<UserProfileDetailDto> selectByTime(String creatTime, Long page, Long pageSize);
-    @Select("SELECT count(*) FROM `user_profile_data` where (#{creatTime} IS NULL OR date_format(creat_time,'%Y-%m-%d')=#{creatTime}) and username in (${name}) and level!='数据不足' ")
+    @Select("SELECT count(*) FROM `user_profile_data` where (#{creatTime} IS NULL OR date_format(creat_time,'%Y-%m-%d')=#{creatTime}) and username in (${name}) and level!='null' ")
     Integer countWithName(String creatTime, String name);
 
-    @Select("SELECT count(*) FROM `user_profile_data` where date_format(creat_time,'%Y-%m-%d')=#{creatTime} and level!='数据不足' ")
+    @Select("SELECT count(*) FROM `user_profile_data` where date_format(creat_time,'%Y-%m-%d')=#{creatTime} and level!='null' ")
     Integer countWithTime(String creatTime);
 }

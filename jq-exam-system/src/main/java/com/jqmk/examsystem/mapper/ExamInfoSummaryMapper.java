@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Update;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -141,5 +142,30 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "WHERE eis.end_time IS NULL " +
             "  AND TIMESTAMPDIFF(MINUTE, eis.start_time, #{now}) > tp.duration; ")
     List<ExamInfoSummary> findTimeoutRecords(LocalDateTime now);
+
+    @Select("SELECT sum(exam_results!=1) as nopass,sum(exam_results=1) as pass FROM `exam_info_summary` WHERE DATE(end_time) = CURDATE()")
+    Map<String, Object> passRatePie();
+
+    @Select("SELECT sum(exam_results!=1) as nopass,sum(exam_results=1) as pass,DATE(end_time) as date FROM `exam_info_summary` " +
+            "WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(end_time) GROUP BY DATE(end_time)  ORDER BY date ")
+    List<Map<String, Object>> passRateHistogram();
+
+    @Select("SELECT count(DISTINCT user.id) as total,count(DISTINCT es.id) as examNum FROM `exam_info_summary` as es,`user` WHERE DATE(es.end_time) = CURDATE() ")
+    Map<String, Object> takeTestNum();
+
+    @Select("SELECT count(id) as total,DATE(end_time) as date FROM `exam_info_summary` WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(end_time) GROUP BY DATE(end_time)  ORDER BY date")
+    List<Map<String, Object>> takeTestNumHistogram();
+
+    @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low FROM `user_profile_data` WHERE DATE(creat_time) = CURDATE()")
+    Map<String, Object> riskPie();
+
+    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(creat_time) GROUP BY DATE(creat_time) ORDER BY date ")
+    List<Map<String, Object>> riskPercentage();
+
+    @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low ,`user`.dept_name as deptName " +
+            "FROM `user_profile_data` as up,`user` WHERE up.username=`user`.username and DATE(up.creat_time) = CURDATE() " +
+            "GROUP BY user.dept_name ORDER BY low desc LIMIT 10")
+    List<Map<String, Object>> riskHistogram();
 
 }

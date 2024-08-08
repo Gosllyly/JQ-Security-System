@@ -50,4 +50,5 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
     Map<String, Object> correctingTestPaper(Integer id, Integer userId, List<String> userAnswer);
 
     Map<String, Object> selectWrong(Integer userId, Integer type, String stem, Long page, Long pageSize);
+
 }

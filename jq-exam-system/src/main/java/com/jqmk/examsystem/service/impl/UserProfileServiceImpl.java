@@ -44,7 +44,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
             UserProfileInfo userProfileInfo = new UserProfileInfo();
             userProfileInfo.setEmployeeId(result.getJSONObject(i).getString("employeeId"));
             userProfileInfo.setUsername(result.getJSONObject(i).getString("personName"));
-            //userProfileInfo.setImage(userProfileMapper.selectImage(userProfileInfo.getUsername(),userProfileInfo.getEmployeeId()));
+            userProfileInfo.setLevel(result.getJSONObject(i).getString("level"));
             userProfileInfo.setTime(LocalDate.parse(result.getJSONObject(i).getString("date")));
             if (!userProfileInfo.getLevel().equals("低风险")&&!userProfileInfo.getLevel().equals("中风险")&&!userProfileInfo.getLevel().equals("高风险")) {
                 userProfileInfo.setLevel("null");
