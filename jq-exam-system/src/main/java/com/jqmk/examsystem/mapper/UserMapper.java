@@ -52,4 +52,14 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("select * from user where id_card = #{idCard} and username =#{username} order by create_date desc limit 0,1 ")
     User selectByCardNoAndName(String idCard, String username);
+
+    @Update("<script>" +
+            "UPDATE user " +
+            "SET role_id = #{roleId} " +
+            "WHERE user.username IN " +
+            "<foreach collection='names' item='name' open='(' separator=',' close=')'>" +
+            "#{name}" +
+            "</foreach>" +
+            "</script>")
+    void updateRoleIdByNames(@Param("names") List<String> names, @Param("roleId") String roleId);
 }

@@ -20,4 +20,6 @@ public interface UserService extends IService<User> {
     Map<String, Object> login(String userName, String password);
 
     List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto);
+
+    void updateUserTable(List<String> includePeopleList, String roleId);
 }

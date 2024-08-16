@@ -64,4 +64,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             return userList;
         }
     }
+
+    @Override
+    public void updateUserTable(List<String> includePeopleList, String roleId) {
+        userMapper.updateRoleIdByNames(includePeopleList,roleId);
+    }
+
 }
