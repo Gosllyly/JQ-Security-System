@@ -20,5 +20,5 @@ public class UserProfileInfoDto {
 
     private String username;
 
-    private String imgFile;
+    //private String imgFile;
 }

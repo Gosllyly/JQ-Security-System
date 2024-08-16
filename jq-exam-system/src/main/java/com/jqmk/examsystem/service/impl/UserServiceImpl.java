@@ -53,12 +53,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto) {
-        String deptNames = StringsUtil.arrayToString(selectPeoplesDto.getIncludeDeptCodes().toString());
+        String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes().toString());
         if (selectPeoplesDto.getIncludeJobType()==null) {
             List<String> userList = userMapper.selectByConditionOR(deptNames,selectPeoplesDto.getName());
             return userList;
         }else {
             String jobTypes = StringsUtil.arrayToStr(selectPeoplesDto.getIncludeJobType().toString());
+            System.out.println(jobTypes);
             List<String> userList = userMapper.selectByCondition(deptNames,jobTypes,selectPeoplesDto.getName());
             return userList;
         }

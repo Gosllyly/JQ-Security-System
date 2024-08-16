@@ -44,12 +44,25 @@ public class StringsUtil {
             return null;
         }
     }
+    public static String arrayToString1(String str) {
+        if (str!=null) {
+            String newStr = str.replace(",\n", "|");
+            String newStr1 = newStr.replace("[", "");
+            String newStr2 = newStr1.replace("]", "");
+            String newStr3 = newStr2.replace("\"", "");
+            String newStr4 = newStr3.replace(", ", "|");
+            return newStr4;
+        }else {
+            return null;
+        }
+    }
     public static String arrayToStr(String str) {
         if (str!=null) {
-            String newStr = str.replace(", ", "\",\"");
+            String newStr = str.replace(",\n", "\",\"");
             String newStr1 = newStr.replace("[", "\"");
             String newStr2 = newStr1.replace("]", "\"");
-            return newStr2;
+            String newStr3 = newStr2.replace(", ", "\",\"");
+            return newStr3;
         }else {
             return null;
         }
@@ -170,7 +183,8 @@ public class StringsUtil {
             String newStr1 = newStr.replace("\"}", "");
             String newStr2 = newStr1.replace("\"", "");
             String newStr3 = newStr2.replace(",", "\n");
-            return newStr3;
+            String newStr4 = newStr3.replaceAll(":", "、");
+            return newStr4;
         }else {
             return null;
         }

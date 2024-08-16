@@ -117,6 +117,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             ExportQuestion exportQuestion = new ExportQuestion();
             exportQuestion.setStem(ech.getStem());
             exportQuestion.setOptions(StringsUtil.jsonToStr(ech.getOptions().toString()));
+            System.out.println(exportQuestion.getOptions());
             exportQuestion.setCorrectOptions(StringsUtil.StingToStr(ech.getCorrectOptions().toString()));
             exportQuestion.setType(ech.getType());
             exportQuestion.setAnalysis(ech.getAnalysis());

@@ -45,7 +45,7 @@ public class ExamInfoSummary implements Serializable {
     /**
      * 考试类别id
      */
-    private Integer examCategoryId;
+    //private Integer examCategoryId;
 
     /**
      * 考试名称

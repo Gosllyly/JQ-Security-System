@@ -4,6 +4,7 @@ package com.jqmk.examsystem.controller;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.dto.userProfile.UserProfileSelectDto;
+import com.jqmk.examsystem.mapper.UserProfileMapper;
 import com.jqmk.examsystem.service.UserProfileService;
 import net.sf.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +24,8 @@ public class UserProfileController {
 
     @Resource
     private UserProfileService userProfileService;
+    @Resource
+    private UserProfileMapper userProfileMapper;
 
     @PostMapping("/data")
     public String getData(@RequestBody JSONObject json) {
@@ -48,6 +51,34 @@ public class UserProfileController {
     @PostMapping ("/updateQuery")
     public WebResult updateQueryResult(String includeDeptCodes,String names) {
         return WebResult.ok().data(userProfileService.updateQueryResult(includeDeptCodes,names));
+    }
+
+    /**
+     * 下面部分开始是二期用户画像接口
+     */
+    @GetMapping("main")
+    public WebResult mainView() {
+        return WebResult.ok().data(userProfileService.viewMain());
+    }
+
+    @GetMapping("select")
+    public WebResult selectByName(String name) {
+        return WebResult.ok().data(userProfileMapper.selectByName(name));
+    }
+
+    @GetMapping("details")
+    public WebResult selectByName(String name,String employeeId) {
+        return WebResult.ok().data(userProfileMapper.selectForDetails(name,employeeId));
+    }
+
+    @GetMapping("violationData")
+    public WebResult violationCount(String name,String employeeId) {
+        return WebResult.ok().data(userProfileService.violationCount(name,employeeId));
+    }
+
+    @GetMapping("tableData")
+    public WebResult tableData(String name,String employeeId) {
+        return WebResult.ok().data(userProfileService.tableData(name,employeeId));
     }
 
 }

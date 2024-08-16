@@ -18,7 +18,7 @@ import java.util.List;
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
 
-    @Select("SELECT username FROM user WHERE (#{jobTypes} IS NULL OR job_type in (${jobTypes})) AND (#{deptNames} IS NULL OR `dept_name` RLIKE #{deptNames}) " +
+    @Select("SELECT username FROM user WHERE job_type in (${jobTypes}) AND (#{deptNames} IS NULL OR `dept_name` RLIKE #{deptNames}) " +
             "and (#{name} IS NULL OR username LIKE '${name}%')")
     List<String> selectByCondition(String deptNames,String jobTypes,String name);
     @Select("SELECT username FROM user WHERE (#{deptNames} IS NULL OR `dept_name` RLIKE #{deptNames}) " +

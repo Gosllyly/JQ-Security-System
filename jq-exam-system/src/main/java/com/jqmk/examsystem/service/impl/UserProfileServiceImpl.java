@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.dto.userProfile.*;
+import com.jqmk.examsystem.entity.PenaltyData;
 import com.jqmk.examsystem.entity.UserProfileInfo;
 import com.jqmk.examsystem.errors.ErrorCodeEnum;
 import com.jqmk.examsystem.exception.BizException;
@@ -55,6 +56,58 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
                 save(userProfileInfo);
             }
         }
+    }
+
+    @Override
+    public Map<String, Object> viewMain() {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        List<UserProfileInfoDto> lowPeople= userProfileMapper.selectLowPeople();
+        result.put("low",lowPeople);
+        List<UserProfileInfoDto> mediumPeoples= userProfileMapper.selectMediumPeoples();
+        result.put("medium",mediumPeoples);
+        List<UserProfileInfoDto> highPeoples= userProfileMapper.selectHighPeoples();
+        result.put("high",highPeoples);
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> violationCount(String name, String employeeId) {
+        String data = jqSecurityCheckMapper.selectData(name,employeeId);
+        List<Map<String, Object>> wearDataNum = jqSecurityCheckMapper.selectWearCount(name,employeeId,data);
+        Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name,data);
+        Integer noWear = jqSecurityCheckMapper.noWearCount(name,data);
+        Integer violationNumber = userProfileMapper.count(data,name,employeeId);
+        Map<String, Object> result = new HashMap<>();
+        result.put("violationNumber",violationNumber);//下井违规
+        result.put("wearDataNum",wearDataNum);//穿戴违规
+        result.put("noWear",noWear);//未穿戴总次数
+        result.put("wrongWear",wrongWear);//穿戴不规范总次数
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> tableData(String name, String employeeId) {
+        Map<String, Object> result = new HashMap<>();
+        List<UserBehavior> dataList = jqSecurityCheckMapper.wearDataNum(name);
+        List<UserBehaviorDto> queryBehaviorList = new ArrayList<>();
+        for (UserBehavior ech : dataList) {
+            UserBehaviorDto userBehaviorDto = new UserBehaviorDto();
+            userBehaviorDto.setHelmetStatus(convert(ech.getHelmetStatus()));
+            userBehaviorDto.setTowelStatus(convert(ech.getTowelStatus()));
+            userBehaviorDto.setCapLampStatus(convert(ech.getCapLampStatus()));
+            userBehaviorDto.setShoesStatus(convert(ech.getShoesStatus()));
+            userBehaviorDto.setRescuerStatus(convert(ech.getRescuerStatus()));
+            userBehaviorDto.setDetectTime(ech.getDetectTime());
+            queryBehaviorList.add(userBehaviorDto);
+        }
+        // 如何查询数据为空，抛出未知错误
+        if (dataList.size() == 0) {
+            return null;
+        }
+        List<PenaltyData> violationData = userProfileMapper.selectViolationData(name);
+        result.put("violationData",violationData);//下井违规
+        result.put("wearData",queryBehaviorList);//穿戴违规
+        return result;
     }
 
     @Override

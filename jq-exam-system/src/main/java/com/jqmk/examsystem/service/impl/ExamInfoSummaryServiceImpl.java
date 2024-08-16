@@ -61,9 +61,9 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username, Integer noChallenge, Long page, Long pageSize) {
-        List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.selectCondition(userId, startTime, endTime, examCategoryId, name, examResults, deptName, jobType, username, noChallenge, (page - 1) * pageSize, pageSize);
-        Integer total = examInfoSummaryMapper.countCondition(userId, startTime, endTime, examCategoryId, name, examResults, deptName, jobType, username, noChallenge);
+    public Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, String name, Integer examResults, String deptName, String jobType, String username, Integer noChallenge, Long page, Long pageSize) {
+        List<ExamRecordDto> examRecordDtoList = examInfoSummaryMapper.selectCondition(userId, startTime, endTime, name, examResults, deptName, jobType, username, noChallenge, (page - 1) * pageSize, pageSize);
+        Integer total = examInfoSummaryMapper.countCondition(userId, startTime, endTime, name, examResults, deptName, jobType, username, noChallenge);
         Map<String, Object> res = new HashMap();
         res.put("data", examRecordDtoList);
         res.put("total", total);
@@ -123,9 +123,9 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public Map<String, Object> selectLearnScore(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize) {
-        List<ExamLearnScore> examLearnScoreList = examInfoSummaryMapper.selectLearnScore(deptName, examCategoryId, username, name, startTime, endTime, (page - 1) * pageSize, pageSize);
-        Integer total = examInfoSummaryMapper.selectLearnScoreCount(deptName, examCategoryId, username, name, startTime, endTime);
+    public Map<String, Object> selectLearnScore(String deptName, String username, String name, String startTime, String endTime, Long page, Long pageSize) {
+        List<ExamLearnScore> examLearnScoreList = examInfoSummaryMapper.selectLearnScore(deptName, username, name, startTime, endTime, (page - 1) * pageSize, pageSize);
+        Integer total = examInfoSummaryMapper.selectLearnScoreCount(deptName, username, name, startTime, endTime);
         Map<String, Object> res = new HashMap();
         res.put("data", examLearnScoreList);
         res.put("total", total);
@@ -133,9 +133,9 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
-    public Map<String, Object> learnScoreCondition(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize) {
-        List<ExamLearnScore> learnScoreCondition = examInfoSummaryMapper.learnScoreCondition(deptName, examCategoryId, username, name, startTime, endTime, (page - 1) * pageSize, pageSize);
-        Integer total = examInfoSummaryMapper.learnScoreConditionCount(deptName, examCategoryId, username, name, startTime, endTime);
+    public Map<String, Object> learnScoreCondition(String deptName,String username, String name, String startTime, String endTime, Long page, Long pageSize) {
+        List<ExamLearnScore> learnScoreCondition = examInfoSummaryMapper.learnScoreCondition(deptName, username, name, startTime, endTime, (page - 1) * pageSize, pageSize);
+        Integer total = examInfoSummaryMapper.learnScoreConditionCount(deptName, username, name, startTime, endTime);
         Map<String, Object> res = new HashMap();
         res.put("data", learnScoreCondition);
         res.put("total", total);

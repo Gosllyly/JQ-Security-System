@@ -37,7 +37,6 @@ public class ExamLearnScoreController {
     @GetMapping ("/exportAll")
     public void exportLearnScore(HttpServletResponse response){
         examInfoSummaryService.exportLearnScore(response);
-        // 使用ExportService创建并填充Excel文件
     }
 
     /**
@@ -46,14 +45,14 @@ public class ExamLearnScoreController {
      * @return
      */
     @GetMapping("/select")
-    public WebResult selectTestRuler(@RequestParam(required=false) String deptName, @RequestParam(required=false) Integer examCategoryId,
+    public WebResult selectTestRuler(@RequestParam(required=false) String deptName,
                                      @RequestParam(required=false) Integer detailDisplay, @RequestParam(required=false) String username,
                                      @RequestParam(required=false) String name, @RequestParam(required=false) String startTime,
                                      @RequestParam(required=false) String endTime,@RequestParam Long page, @RequestParam Long pageSize) {
         if (detailDisplay == 0) {
-            return WebResult.ok().data(examInfoSummaryService.selectLearnScore(deptName,examCategoryId,username,name,startTime,endTime,page,pageSize));
+            return WebResult.ok().data(examInfoSummaryService.selectLearnScore(deptName,username,name,startTime,endTime,page,pageSize));
         }else {
-            return WebResult.ok().data(examInfoSummaryService.learnScoreCondition(deptName,examCategoryId,username,name,startTime,endTime,page,pageSize));
+            return WebResult.ok().data(examInfoSummaryService.learnScoreCondition(deptName,username,name,startTime,endTime,page,pageSize));
         }
     }
 }

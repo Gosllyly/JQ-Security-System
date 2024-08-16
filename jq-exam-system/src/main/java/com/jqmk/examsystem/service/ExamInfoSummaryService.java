@@ -23,7 +23,7 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     Map<String, Object> viewMain(Integer userId,Integer noChallenge, Long page, Long pageSize);
 
-    Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, Integer examCategoryId, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
+    Map<String, Object> selectCondition(Integer userId, String startTime, String endTime, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
 
     void exportExamRecord(Integer userId, Integer noChallenge, HttpServletResponse response);
 
@@ -32,9 +32,9 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     void exportLearnScore(HttpServletResponse response);
 
-    Map<String, Object> selectLearnScore(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize);
+    Map<String, Object> selectLearnScore(String deptName, String username, String name, String startTime, String endTime, Long page, Long pageSize);
 
-    Map<String, Object> learnScoreCondition(String deptName, Integer examCategoryId, String username, String name, String startTime, String endTime, Long page, Long pageSize);
+    Map<String, Object> learnScoreCondition(String deptName, String username, String name, String startTime, String endTime, Long page, Long pageSize);
 
     Map<String, Object> viewLearnTime(Long page, Long pageSize);
 

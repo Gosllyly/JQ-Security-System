@@ -64,11 +64,11 @@ public class ExamInfoSummaryController {
     @GetMapping("/select")
     @Transactional
     public WebResult selectCondition(@RequestParam(required = false) Integer userId, @RequestParam(required = false) String startTime, @RequestParam(required = false) String endTime,
-                                     @RequestParam(required = false) Integer examCategoryId,@RequestParam(required = false) String name,@RequestParam(required = false) Integer examResults,
+                                     @RequestParam(required = false) String name,@RequestParam(required = false) Integer examResults,
                                      @RequestParam(required = false) String deptName,@RequestParam(required = false) String  jobType,@RequestParam(required = false) String username,
                                      @RequestParam Long page, @RequestParam Long pageSize) {
         Integer noChallenge = 0;//挑战答题
-        return WebResult.ok().data(examInfoSummaryService.selectCondition(userId,startTime,endTime,examCategoryId,name,examResults,deptName,jobType,username,noChallenge,page,pageSize));
+        return WebResult.ok().data(examInfoSummaryService.selectCondition(userId,startTime,endTime,name,examResults,deptName,jobType,username,noChallenge,page,pageSize));
     }
 
     /**

@@ -32,4 +32,10 @@ public interface UserProfileService extends IService<UserProfileInfo> {
     List<UserBehaviorDto> selectBehavior(String employeeId, String name);
 
     Map<String, Object> selectByCondition(String creatTime, String names, Long page, Long pageSize);
+
+    Map<String, Object> viewMain();
+
+    Map<String, Object> violationCount(String name, String employeeId);
+
+    Map<String, Object> tableData(String name, String employeeId);
 }

@@ -17,6 +17,12 @@ import lombok.Data;
 public class ExportQuestion {
 
     /**
+     * 问题类型1(单选)，2(多选)，3(判断)
+     */
+    @ExcelProperty(value = "问题类型",converter = QuestionTypeConverter.class)
+    private Integer type;
+
+    /**
      * 题干
      */
     @ExcelProperty("题干")
@@ -41,12 +47,6 @@ public class ExportQuestion {
      */
     @ExcelProperty("解析")
     private String analysis;
-
-    /**
-     * 问题类型1(单选)，2(多选)，3(判断)
-     */
-    @ExcelProperty(value = "问题类型",converter = QuestionTypeConverter.class)
-    private Integer type;
 
     /**
      * 题目状态是否被禁用0(启用)，1(禁用)

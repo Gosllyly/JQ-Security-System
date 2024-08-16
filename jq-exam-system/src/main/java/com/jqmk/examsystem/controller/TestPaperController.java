@@ -80,7 +80,7 @@ public class TestPaperController {
         testPaper.setNoChallenge(0);
 
         List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
-                .like(ExamCrowdManage::getId,testPaper.getExamCategoryId()), Object::toString);
+                .like(ExamCrowdManage::getId,testPaper.getId()), Object::toString);
         //从人群中查出人员姓名并拼接
         testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.save(testPaper);
@@ -99,7 +99,7 @@ public class TestPaperController {
         }
 
         List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
-                .like(ExamCrowdManage::getId,testPaper.getExamCategoryId()), Object::toString);
+                .like(ExamCrowdManage::getId,testPaper.getId()), Object::toString);
         testPaper.setUpdateTime(LocalDateTime.now());
         testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.updateById(testPaper);

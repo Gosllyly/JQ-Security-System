@@ -48,7 +48,7 @@ public class ChallengeTestController {
         if(!TestPaperUtil.ifSumLegal(testPaper)){
             return WebResult.fail().message("创建失败！分值总和应为100");
         }
-        testPaper.setExamCategoryId(0);
+        //testPaper.setExamCategoryId(0);
         testPaper.setNoChallenge(1);
         testPaperService.save(testPaper);
         return WebResult.ok().message("创建考试规则成功");
@@ -60,7 +60,7 @@ public class ChallengeTestController {
         if(!TestPaperUtil.ifSumLegal(testPaper)){
             return WebResult.fail().message("更新失败！分值总和应为100");
         }
-        testPaper.setExamCategoryId(0);
+        //testPaper.setExamCategoryId(0);
         testPaper.setUpdateTime(LocalDateTime.now());
         testPaperService.updateById(testPaper);
         return WebResult.ok().message("更新成功");

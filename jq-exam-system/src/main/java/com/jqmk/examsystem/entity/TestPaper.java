@@ -38,7 +38,7 @@ public class TestPaper implements Serializable {
     /**
      * 考试类别id(叶子类别)
      */
-    private Integer examCategoryId;
+    //private Integer examCategoryId;
 
     /**
      * 题库id
