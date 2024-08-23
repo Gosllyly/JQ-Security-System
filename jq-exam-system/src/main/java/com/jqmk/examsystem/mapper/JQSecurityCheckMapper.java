@@ -34,12 +34,12 @@ public interface JQSecurityCheckMapper {
     String selectData(String name, String employeeId);
 
     @Select("SELECT sum(helmetStatus=2) as helmetNum,sum(helmetStatus=2) as helmetNum,sum(towelStatus=2) as towelNum,sum(shoesStatus=2) as shoesNum,sum(capLampStatus=2) as capNum,sum(rescuerStatus=2) as rescurNum " +
-            "FROM `employee_clock_history` WHERE personName = #{name} and detectTime>=#{data} ")
-    List<Map<String, Object>> selectWearCount(String name, String employeeId, String data);
+            "FROM `employee_clock_history` WHERE personName = #{name} order by detectTime desc limit 0,7 ")
+    List<Map<String, Object>> selectWearCount(String name, String employeeId);
 
-    @Select("select count(*) from `employee_clock_history` WHERE personName = #{name} and detectTime>=#{data} and (helmetStatus=2 or capLampStatus=2 or shoesStatus=2 or towelStatus=2 or rescuerStatus=2)")
-    Integer wrongWearCount(String name, String data);
+    @Select("select count(*) from `employee_clock_history` WHERE personName = #{name} and (helmetStatus=2 or capLampStatus=2 or shoesStatus=2 or towelStatus=2 or rescuerStatus=2) order by detectTime desc limit 0,7 ")
+    Integer wrongWearCount(String name);
 
-    @Select("select count(*) from `employee_clock_history` WHERE personName = #{name} and detectTime>=#{data} and (helmetStatus=0 or capLampStatus=0 or shoesStatus=0 or towelStatus=0 or rescuerStatus=0)")
-    Integer noWearCount(String name, String data);
+    @Select("select count(*) from `employee_clock_history` WHERE personName = #{name} and (helmetStatus=0 or capLampStatus=0 or shoesStatus=0 or towelStatus=0 or rescuerStatus=0) order by detectTime desc limit 0,7 ")
+    Integer noWearCount(String name);
 }

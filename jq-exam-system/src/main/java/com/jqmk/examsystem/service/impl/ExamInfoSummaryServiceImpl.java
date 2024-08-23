@@ -2,6 +2,7 @@ package com.jqmk.examsystem.service.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
+import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.*;
@@ -16,15 +17,18 @@ import com.jqmk.examsystem.service.ExamInfoSummaryService;
 import com.jqmk.examsystem.service.QuestionService;
 import com.jqmk.examsystem.service.TestPaperQuestionService;
 import com.jqmk.examsystem.utils.StringsUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -184,6 +188,73 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
+    public Map<String, Object> examDetail(Integer id) {
+        List<Map<String, Object>> examDetails = examInfoSummaryMapper.selectExamDetails(id);
+        Map<String, Object> tableData = examInfoSummaryMapper.selectTableData(id);
+        List<String> strings = examInfoSummaryMapper.selectExamPeople(id);
+        List<String> names = examInfoSummaryMapper.selectAllExamPeople(id);
+        List<String> nameList= Arrays.asList(StringsUtil.stringRecom(names.toString()).split(","));
+        List<String> intersection = (List<String>) CollectionUtils.subtract(nameList, strings);
+        Map<String, Object> res = new HashMap();
+        res.put("data", examDetails);
+        res.put("peoples", intersection);
+        res.put("table", tableData);
+        return res;
+    }
+
+    @Override
+    public Map<String, Object> examPeoplePie(@RequestParam Integer testId) {
+        Map<String, Object> res = new HashMap();
+        res.put("big", examInfoSummaryMapper.takeTestNum(testId));
+        res.put("small", examInfoSummaryMapper.passRatePie(testId));
+        return res;
+    }
+
+
+    @Override
+    public List<Map<String, Object>> examPercentage(String time,Integer id,Integer size) {
+        if (id==null) {
+            Integer testId = examInfoSummaryMapper.selectTestId();
+            return examInfoSummaryMapper.selectExamPercentage(time,testId,size);
+        }else {
+            return examInfoSummaryMapper.selectExamPercentage(time,id,size);
+        }
+    }
+
+    @Override
+    public List<Map<String, Object>> examHistogram(String time, Integer id, Integer size) {
+        if (id==null) {
+            Integer testId = examInfoSummaryMapper.selectTestId();
+            if (examInfoSummaryMapper.selectExamHistogram(time,testId,size).size()<1) {
+                return examInfoSummaryMapper.selectDeptName(size);
+            }else {
+                return examInfoSummaryMapper.selectExamHistogram(time,testId,size);
+            }
+        }else {
+            if (examInfoSummaryMapper.selectExamHistogram(time,id,size).size()<1) {
+                return examInfoSummaryMapper.selectDeptName(size);
+            }else {
+                return examInfoSummaryMapper.selectExamHistogram(time,id,size);
+            }
+        }
+    }
+
+    @Override
+    public Map<String, Object> title() {
+        Integer amount = Math.toIntExact(examInfoSummaryMapper.selectCount(new QueryWrapper<>()));
+        Integer people = examInfoSummaryMapper.countPeople();
+        Double number = examInfoSummaryMapper.countNumber();
+        DecimalFormat df = new DecimalFormat("0.000");
+        Double passNum = examInfoSummaryMapper.selectPassNum();
+        Map<String, Object> res = new HashMap();
+        res.put("amount", amount);
+        res.put("people", people);
+        res.put("reference", df.format((people/number)*100));
+        res.put("pass", df.format((passNum/amount)*100));
+        return res;
+    }
+
+    @Override
     public Map<String, Object> learnTimeCondition(String deptName, String username, String name, Long page, Long pageSize) {
         List<ExamLearnTime> learnTimeCondition = examInfoSummaryMapper.learnTimeCondition(deptName, username, name, (page - 1) * pageSize, pageSize);
         Integer total = examInfoSummaryMapper.learnTimeConditionCount(deptName, username, name);
@@ -197,7 +268,6 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     public Map<String, Object> viewWrongMain(Integer userId, Long page, Long pageSize) {
         List<WrongQuestion> errorQuestion = questionMapper.selectErrorQuestion(userId, (page - 1) * pageSize, pageSize);
         Integer total = questionMapper.countErrorQuestion(userId);
-        ;
         Map<String, Object> res = new HashMap();
         res.put("question", errorQuestion);
         res.put("total", total);

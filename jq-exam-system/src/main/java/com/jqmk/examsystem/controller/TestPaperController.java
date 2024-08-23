@@ -71,7 +71,7 @@ public class TestPaperController {
     public WebResult addTestPaperRuler(@RequestBody TestPaper testPaper) {
         //判断各个题型数量设置是否合法
         if(!questionService.ifQuestionCountIsLegal(testPaper)){
-            return WebResult.fail().message("错误信息！");
+            return WebResult.fail().message("题库中相应类型题目数量不足");
         }
         // 验证单选题、多选题和判断题的分数总和是否等于 100 分
         if(!TestPaperUtil.ifSumLegal(testPaper)){
@@ -79,10 +79,9 @@ public class TestPaperController {
         }
         testPaper.setNoChallenge(0);
 
-        List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
-                .like(ExamCrowdManage::getId,testPaper.getId()), Object::toString);
+        //List<String> names = examCrowdManageService.selectNames(testPaper.getExamCrowdId());
         //从人群中查出人员姓名并拼接
-        testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
+        //testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.save(testPaper);
         return WebResult.ok().message("创建考试规则成功");
     }
@@ -91,17 +90,16 @@ public class TestPaperController {
     public WebResult updateTestPaperRuler(@RequestBody TestPaper testPaper) {
         //判断各个题型数量设置是否合法
         if(!questionService.ifQuestionCountIsLegal(testPaper)){
-            return WebResult.fail().message("错误信息！");
+            return WebResult.fail().message("题库中相应类型题目数量不足");
         }
         // 验证单选题、多选题和判断题的分数总和是否等于 100 分
         if(!TestPaperUtil.ifSumLegal(testPaper)){
             return WebResult.fail().message("更新失败！分值总和应为100");
         }
-
-        List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
-                .like(ExamCrowdManage::getId,testPaper.getId()), Object::toString);
+        //List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
+        //        .like(ExamCrowdManage::getId,testPaper.getId()), Object::toString);
         testPaper.setUpdateTime(LocalDateTime.now());
-        testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
+        //testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.updateById(testPaper);
         return WebResult.ok().message("更新成功");
     }
@@ -112,8 +110,8 @@ public class TestPaperController {
     }
 
     @GetMapping("/viewUsername")
-    public WebResult viewUsername() {
-        List<String> usernameList =  userService.listObjs(new QueryWrapper<User>().lambda().select(User::getUsername).eq( User::getDeleteFlag, 0), Object::toString);
+    public WebResult viewUsername(String name) {
+        List<String> usernameList =  userService.listObjs(new QueryWrapper<User>().lambda().select(User::getUsername).like(name!=null,User::getUsername,name).eq( User::getDeleteFlag, 0), Object::toString);
         Stream<String> distinct = usernameList.stream().distinct();
         return WebResult.ok().data(distinct);
     }
@@ -124,7 +122,7 @@ public class TestPaperController {
                 .select("id","name","exam_category_id","duration","pass_score","start_time","end_time","status","can_redo","time_limited")
                 .eq(examCategoryId != null, "exam_category_id", examCategoryId)
                 .eq("no_challenge",0)
-                .eq(name != null, "name", name)
+                .like(name != null, "name", name)
                 .eq(status != null, "status", status).orderByDesc("update_time"));
         return WebResult.ok().data(BeanUtil.copyToList(testPaperList, TestPaperDto.class));
     }
@@ -150,6 +148,7 @@ public class TestPaperController {
                 .select("id","name","duration","pass_score","start_time","end_time","single_choice_num",
                         "single_choice_score","multi_choice_num","multi_choice_score","judge_choice_num","judge_choice_score")
                 .eq( "status", 0)
+                .ge("end_time",LocalDateTime.now())
                 .eq("no_challenge",noChallenge)
                 .like("exam_crowd_ids",user.getUsername())));
     }

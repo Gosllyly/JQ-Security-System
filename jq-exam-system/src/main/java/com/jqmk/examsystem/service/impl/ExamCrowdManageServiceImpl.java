@@ -4,7 +4,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.entity.ExamCrowdManage;
 import com.jqmk.examsystem.mapper.ExamCrowdManageMapper;
 import com.jqmk.examsystem.service.ExamCrowdManageService;
+import com.jqmk.examsystem.utils.StringsUtil;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * <p>
@@ -17,4 +20,10 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExamCrowdManageServiceImpl extends ServiceImpl<ExamCrowdManageMapper, ExamCrowdManage> implements ExamCrowdManageService {
 
+    @Override
+    public List<String> selectNames(List<Integer> examCrowdId) {
+        StringsUtil.arrayToStr(examCrowdId.toString());
+        System.out.println("="+StringsUtil.arrayToStr(examCrowdId.toString()));
+        return null;
+    }
 }

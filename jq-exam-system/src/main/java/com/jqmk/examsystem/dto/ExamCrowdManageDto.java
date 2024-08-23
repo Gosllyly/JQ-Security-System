@@ -47,8 +47,9 @@ public class ExamCrowdManageDto implements Serializable {
     /**
      * 考试人的user列表
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String>includePeoples;
+    private String includePeoples;
+
+    private String riskPeople;
 
     /**
      * 是否被删除，默认是0(未被删除)，1(已删除)

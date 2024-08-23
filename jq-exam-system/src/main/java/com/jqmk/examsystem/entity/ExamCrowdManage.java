@@ -46,6 +46,8 @@ public class ExamCrowdManage implements Serializable {
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> includeJobType;
 
+    private String riskPeople;
+
     /**
      * 考试人的user列表
      */

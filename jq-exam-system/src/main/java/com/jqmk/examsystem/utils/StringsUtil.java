@@ -44,9 +44,9 @@ public class StringsUtil {
             return null;
         }
     }
-    public static String arrayToString1(String str) {
+    public static String arrayToString1(List<String> str) {
         if (str!=null) {
-            String newStr = str.replace(",\n", "|");
+            String newStr = str.toString().replace(",\n", "|");
             String newStr1 = newStr.replace("[", "");
             String newStr2 = newStr1.replace("]", "");
             String newStr3 = newStr2.replace("\"", "");
@@ -66,6 +66,26 @@ public class StringsUtil {
         }else {
             return null;
         }
+    }
+    public static String intToStr(String str) {
+        if (str!=null) {
+            String newStr = str.replace(",", "\",\"");
+            List<String> list = new ArrayList<>(Arrays.asList(newStr));
+            /**  用StringBuilder作字符串拼接  */
+            StringBuilder sb = new StringBuilder();
+            sb.append("\"");
+            int seq = 1;
+            for (String s : list) {
+
+                sb.append(s);
+                if (seq++ != list.size()){
+                    sb.append("、");
+                }
+            }
+            sb.append("\"");
+            return String.valueOf(sb);
+        }
+        return null;
     }
     public static StringBuilder strAdd(String str) {
         if (str!=null) {

@@ -38,4 +38,6 @@ public class SelectPeoplesDto {
     private List<String> includeJobType;
 
     private String name;
+
+    private String riskPeople;
 }

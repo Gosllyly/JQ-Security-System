@@ -2,6 +2,7 @@ package com.jqmk.examsystem.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -37,6 +38,11 @@ public class QuestionBank implements Serializable {
      */
     private String bankName;
 
+    /**
+     * 题目状态是否被禁用0(启用)，1(禁用)
+     */
+    @TableLogic
+    private Integer status;
 
 //    private LocalDateTime createTime;
 //

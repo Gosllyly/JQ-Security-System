@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.jqmk.examsystem.dto.ExamQuestion;
 import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.TestPaper;
@@ -21,7 +22,9 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -52,10 +55,43 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     }
 
     @Override
+    public Page queryQuestionPage(String stem, Integer type, Long page, Long pageSize) {
+        Page<Question> questionPage = new Page<>(page,pageSize);
+        questionPage.addOrder(new OrderItem("update_time",false));
+        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().like(stem!=null,"stem",stem)
+                .eq( "status",0).eq(type!=null,"type",type)).getRecords());
+        return records;
+    }
+
+    @Override
+    public Map<String, Object> viewDelQuestion(Long page, Long pageSize) {
+        Integer total = questionMapper.selectDelCount();
+        List<ExamQuestion>  questionList = questionMapper.viewDelQuestion((page - 1) * pageSize, pageSize);
+        Map<String, Object> res = new HashMap();
+        res.put("data", questionList);
+        res.put("total", total);
+        return res;
+    }
+
+    @Override
+    public void restoreQuestion(String ids) {
+        String idData = StringsUtil.intToStr(ids);
+        questionMapper.restoreQuestion(idData);
+    }
+
+    @Override
     public Page selectBankByPage(Integer questionBankId, Long page, Long pageSize) {
         Page<Question> questionPage = new Page<>(page,pageSize);
         questionPage.addOrder(new OrderItem("update_time",false));
-        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("question_bank_id",questionBankId)).getRecords());
+        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("question_bank_id",questionBankId).eq("status",0)).getRecords());
+        return records;
+    }
+
+    @Override
+    public Page selectBaseBankByPage(Long page, Long pageSize) {
+        Page<Question> questionPage = new Page<>(page,pageSize);
+        questionPage.addOrder(new OrderItem("update_time",false));
+        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("status",0)).getRecords());
         return records;
     }
 

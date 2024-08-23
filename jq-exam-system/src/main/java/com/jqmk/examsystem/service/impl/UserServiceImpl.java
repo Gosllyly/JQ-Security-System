@@ -53,14 +53,25 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto) {
-        String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes().toString());
-        if (selectPeoplesDto.getIncludeJobType()==null) {
+        if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getRiskPeople()==null) {
+            String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
             List<String> userList = userMapper.selectByConditionOR(deptNames,selectPeoplesDto.getName());
+            return userList;
+        }else if (selectPeoplesDto.getRiskPeople()==null&&selectPeoplesDto.getIncludeJobType()!=null){
+            String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
+            String jobTypes = StringsUtil.arrayToStr(selectPeoplesDto.getIncludeJobType().toString());
+            List<String> userList = userMapper.selectByCondition(deptNames,jobTypes,selectPeoplesDto.getName());
+            return userList;
+        }else if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getRiskPeople()!=null){
+            String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
+            ///String riskPeople = StringsUtil.arrayToStr(selectPeoplesDto.getRiskPeople().toString());
+            List<String> userList = userMapper.selectByConditionOther(deptNames,selectPeoplesDto.getName(),selectPeoplesDto.getRiskPeople());
             return userList;
         }else {
             String jobTypes = StringsUtil.arrayToStr(selectPeoplesDto.getIncludeJobType().toString());
-            System.out.println(jobTypes);
-            List<String> userList = userMapper.selectByCondition(deptNames,jobTypes,selectPeoplesDto.getName());
+            String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
+            //String riskPeople = StringsUtil.arrayToStr(selectPeoplesDto.getRiskPeople().toString());
+            List<String> userList = userMapper.selectByConditionAll(deptNames,jobTypes,selectPeoplesDto.getName(),selectPeoplesDto.getRiskPeople());
             return userList;
         }
     }

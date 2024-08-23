@@ -38,4 +38,12 @@ public interface UserProfileService extends IService<UserProfileInfo> {
     Map<String, Object> violationCount(String name, String employeeId);
 
     Map<String, Object> tableData(String name, String employeeId);
+
+    Map<String, Object> resultSort(String name, String employeeId,String level);
+
+    Map<String, Object> riskPie(String time);
+
+    List<Map<String, Object>> riskPercentage(String startTime, Integer type);
+
+    Map<String, Object> selectByName(String name);
 }

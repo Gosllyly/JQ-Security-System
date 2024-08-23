@@ -37,6 +37,14 @@ public class ExamLearnScore {
     @ExcelProperty("考试获取学分")
     @ColumnWidth(value = 18)
     private Integer obtainLearningScore;
+
+    /**
+     * 本次考试实际获取的学时
+     */
+    @ExcelProperty("实际获取学时")
+    @ColumnWidth(value = 18)
+    private Integer obtainLearningTime;
+
 //    /**
 //     * 总获取学分
 //     */

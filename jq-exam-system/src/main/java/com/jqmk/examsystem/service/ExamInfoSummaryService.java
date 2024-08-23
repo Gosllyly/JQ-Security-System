@@ -6,6 +6,7 @@ import com.jqmk.examsystem.dto.ExamLearnTime;
 import com.jqmk.examsystem.dto.ExamRecordDto;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
@@ -51,4 +52,13 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
 
     Map<String, Object> selectWrong(Integer userId, Integer type, String stem, Long page, Long pageSize);
 
+    Map<String, Object> examDetail(Integer id);
+
+    Map<String, Object> examPeoplePie(@RequestParam Integer testId);
+
+    List<Map<String, Object>> examPercentage(String time,Integer id,Integer size);
+
+    List<Map<String, Object>> examHistogram(String time, Integer id, Integer size);
+
+    Map<String, Object> title();
 }

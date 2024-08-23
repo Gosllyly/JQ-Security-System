@@ -1,6 +1,7 @@
 package com.jqmk.examsystem.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jqmk.examsystem.dto.userProfile.ResultSort;
 import com.jqmk.examsystem.dto.userProfile.UserProfileDetailDto;
 import com.jqmk.examsystem.dto.userProfile.UserProfileInfoDto;
 import com.jqmk.examsystem.entity.PenaltyData;
@@ -80,9 +81,64 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
             "order by up.creat_time desc limit 0,1")
     Map<String, Object> selectForDetails(String name,String employeeId);
 
-    @Select("SELECT COUNT(*) FROM `penalty_data` WHERE violation_date>=#{data} and duty_person=#{name} ")
-    Integer count(String data, String name, String employeeId);
+    @Select("SELECT COUNT(*) FROM `penalty_data` WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(violation_date) and duty_person=#{name} ")
+    Integer count(String name, String employeeId);
 
     @Select("select violation_date, violation_facts,penalty_amount from penalty_data where duty_person=#{name} order by violation_date desc limit 4")
     List<PenaltyData> selectViolationData(String name);
+
+    @Select("select count(*) from user_profile_data where to_days(creat_time) = to_days(now())")
+    Integer countToday();
+
+    @Select("select id,username,employee_id from user_profile_data order by id  limit #{i},1")
+    ResultSort selectId(Integer i);
+
+    @Select("UPDATE user_profile_data SET score=score-#{violationNumber} WHERE id = #{id} ")
+    void deductPoints(Long id, Integer violationNumber);
+
+    @Select("SELECT `rank`" +
+            "FROM (" +
+            "    SELECT username, score,level,creat_time, ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "    FROM user_profile_data " +
+            ") AS ranked_table " +
+            "WHERE username = #{name} and `level`=#{level} and to_days(creat_time) = to_days(now()) order by creat_time desc limit 0,1")
+    Integer viewResultSort(String name, String employeeId,String level);
+
+    @Select("select count(*) from user_profile_data WHERE `level`=#{level} and to_days(creat_time) = to_days(now()) ")
+    Integer viewResultAll(String level);
+
+    @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low FROM `user_profile_data` WHERE DATE(creat_time) = CURDATE()")
+    Map<String, Object> riskPie();
+
+    @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low FROM `user_profile_data` WHERE TO_DAYS(NOW()) - TO_DAYS(DATE(creat_time)) = 1")
+    Map<String, Object> riskPieYesterday();
+
+    @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low FROM `user_profile_data` WHERE DATE(creat_time) = #{time}")
+    Map<String, Object> riskPieOtherDay(String time);
+
+    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "WHERE date(creat_time)>=#{startTime} GROUP BY DATE(creat_time) ORDER BY date ")
+    List<Map<String, Object>> riskPercentage(String startTime);
+
+    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "WHERE date(creat_time)>=#{startTime} GROUP BY WEEK(DATE(creat_time)) ORDER BY date ")
+    List<Map<String, Object>> riskPercentageByWeek(String startTime);
+
+    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "WHERE date(creat_time)>=#{startTime} GROUP BY MONTH(DATE(creat_time)) ORDER BY date ")
+    List<Map<String, Object>> riskPercentageByMonth(String startTime);
+
+    @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low ,`user`.dept_name as deptName " +
+            "FROM `user_profile_data` as up,`user` WHERE up.username=`user`.username and DATE(up.creat_time) = #{time} " +
+            "GROUP BY user.dept_name ORDER BY low desc LIMIT 10")
+    List<Map<String, Object>> riskHistogram(String time);
+
+    @Select("SELECT p.duty_person as dutyPerson,p.duty_unit as dutyUnit,count(p.duty_person) as number,up.`level`,SUM(p.penalty_amount) as money,user.employee_id as employeeId " +
+            "FROM penalty_data as p,user,user_profile_data as up where p.duty_person=user.username and p.duty_unit=user.dept_name " +
+            "and up.username=p.duty_person and (#{time} IS NULL OR p.violation_date=#{time}) and (#{deptName} IS NULL OR p.duty_unit = #{deptName}) GROUP BY p.duty_person,user.username ")
+    List<Map<String, Object>> violationData(String time,String deptName);
+
+    @Select("SELECT distinct  username,employee_id,level FROM `user_profile_data` where to_days(creat_time) = to_days(now()) and username in (${names}) " +
+            "and level!='null' and level=#{type}")
+    List<UserProfileInfoDto> selectByName(String names,String type);
 }

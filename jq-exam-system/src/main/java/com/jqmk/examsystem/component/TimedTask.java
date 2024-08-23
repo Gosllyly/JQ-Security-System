@@ -6,12 +6,16 @@ import com.jqmk.examsystem.dto.mas.MasLoginRespDto;
 import com.jqmk.examsystem.dto.mas.MasPerson;
 import com.jqmk.examsystem.dto.mas.MasPersonListRespDto;
 import com.jqmk.examsystem.dto.mas.MasPersonResBody;
+import com.jqmk.examsystem.dto.userProfile.ResultSort;
 import com.jqmk.examsystem.entity.User;
+import com.jqmk.examsystem.mapper.JQSecurityCheckMapper;
 import com.jqmk.examsystem.mapper.UserMapper;
+import com.jqmk.examsystem.mapper.UserProfileMapper;
 import com.jqmk.examsystem.utils.HttpClientUtil;
 import javafx.util.Pair;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
@@ -34,6 +38,10 @@ public class TimedTask {
     private MasInteractiveConfig masInteractiveConfig;
     @Resource
     private UserMapper userMapper;
+    @Resource
+    private JQSecurityCheckMapper jqSecurityCheckMapper;
+    @Resource
+    private UserProfileMapper userProfileMapper;
 
 
     //@Scheduled(cron = "0 0/10 13 * * ?")
@@ -100,5 +108,21 @@ public class TimedTask {
             log.info("同步完成第 {} 页", pageIndex);
         }
         log.info("从梅安森同步用户数据成功...");
+    }
+    //@Scheduled(cron = "0 */1 * * * ?")
+    public void CalculateScore () {
+        //先统计多少人今天违章的
+        Integer amount = userProfileMapper.countToday();
+        for (int i = 0; i < amount; i++) {//循环，对每个人的分数进行修改
+            ResultSort resultSort = userProfileMapper.selectId(i);//取出id,用户名，工号
+            String name = resultSort.getUsername();
+            String employeeId = resultSort.getEmployeeId();
+            Integer violationNumber = userProfileMapper.count(name,employeeId);//计算最近7天的下井违章次数
+            userProfileMapper.deductPoints(resultSort.getId(),violationNumber);
+            Integer noWear = jqSecurityCheckMapper.noWearCount(name);//统计未穿戴次数
+            userProfileMapper.deductPoints(resultSort.getId(),noWear);
+            Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name);
+            userProfileMapper.deductPoints(resultSort.getId(),wrongWear);//统计穿戴不规范次数
+        }
     }
 }

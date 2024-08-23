@@ -2,21 +2,16 @@ package com.jqmk.examsystem.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.jqmk.examsystem.dto.ExamInfoSummaryDto;
-import com.jqmk.examsystem.dto.ExamQuestion;
-import com.jqmk.examsystem.dto.ExamRecordDto;
-import com.jqmk.examsystem.dto.WebResult;
+import com.jqmk.examsystem.dto.*;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
+import com.jqmk.examsystem.entity.QuestionBank;
 import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
 import com.jqmk.examsystem.mapper.QuestionMapper;
 import com.jqmk.examsystem.service.ExamInfoSummaryService;
 import com.jqmk.examsystem.utils.StringsUtil;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
@@ -81,8 +76,8 @@ public class ExamInfoSummaryController {
     }
 
     @GetMapping("/viewExamName")
-    public WebResult viewExamName() {
-        List<String> examNameList  =  examInfoSummaryService.listObjs(new QueryWrapper<ExamInfoSummary>().lambda().select(ExamInfoSummary::getName).orderByDesc(ExamInfoSummary::getUpdateTime), Object::toString);
+    public WebResult viewExamName(String examName) {
+        List<String> examNameList  =  examInfoSummaryService.listObjs(new QueryWrapper<ExamInfoSummary>().lambda().select(ExamInfoSummary::getName).like(examName!=null,ExamInfoSummary::getName,examName).orderByDesc(ExamInfoSummary::getUpdateTime), Object::toString);
         Stream<String> distinct = examNameList.stream().distinct();
         return WebResult.ok().data(distinct);
     }
@@ -116,4 +111,28 @@ public class ExamInfoSummaryController {
         res.put("answer", examInfoSummaryList);
         return WebResult.ok().data(res);
     }
+
+    @GetMapping("scoreDetail")
+    public WebResult scoreDetail() {
+        return WebResult.ok().data(examInfoSummaryMapper.scoreDetail());
+    }
+
+    @GetMapping("examDetail")
+    public WebResult examDetail(@RequestParam Integer id) {
+        return WebResult.ok().data(examInfoSummaryService.examDetail(id));
+    }
+
+    @GetMapping("delWrongById")
+    public WebResult delWrongById(@RequestParam Integer id) {
+        examInfoSummaryMapper.delWrongById(id);
+        return WebResult.ok().message("删除成功");
+    }
+
+    @GetMapping("delWrongByUserId")
+    public WebResult delWrongByUserId(@RequestParam Integer userId) {
+        examInfoSummaryMapper.delWrongByUserId(userId);
+        return WebResult.ok().message("删除成功");
+    }
+
+
 }

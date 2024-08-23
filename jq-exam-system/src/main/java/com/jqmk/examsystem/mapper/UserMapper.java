@@ -25,6 +25,14 @@ public interface UserMapper extends BaseMapper<User> {
             "and (#{name} IS NULL OR username LIKE '${name}%')")
     List<String> selectByConditionOR(String deptNames,String name);
 
+    @Select("SELECT distinct user.username FROM user,user_profile_data as up WHERE (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR user.username LIKE '${name}%') and (#{riskPeople} IS NULL OR up.level LIKE '${riskPeople}%'))")
+    List<String> selectByConditionOther(String deptNames,String name,String riskPeople);
+
+    @Select("SELECT distinct user.username FROM user,user_profile_data as up WHERE user.job_type in (${jobTypes})  AND (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR user.username LIKE '${name}%') and (#{riskPeople} IS NULL OR up.level LIKE '${riskPeople}%')")
+    List<String> selectByConditionAll(String deptNames,String jobTypes, String name,String riskPeople);
+
     @Update("UPDATE user " +
             "set " +
             "username = #{username}," +
@@ -62,4 +70,5 @@ public interface UserMapper extends BaseMapper<User> {
             "</foreach>" +
             "</script>")
     void updateRoleIdByNames(@Param("names") List<String> names, @Param("roleId") String roleId);
+
 }

@@ -61,9 +61,9 @@ public class UserProfileController {
         return WebResult.ok().data(userProfileService.viewMain());
     }
 
-    @GetMapping("select")
+    @PostMapping("select")
     public WebResult selectByName(String name) {
-        return WebResult.ok().data(userProfileMapper.selectByName(name));
+        return WebResult.ok().data(userProfileService.selectByName(name));
     }
 
     @GetMapping("details")
@@ -80,5 +80,11 @@ public class UserProfileController {
     public WebResult tableData(String name,String employeeId) {
         return WebResult.ok().data(userProfileService.tableData(name,employeeId));
     }
+
+    @GetMapping("sort")
+    public WebResult resultSort(String name,String employeeId,String level) {
+        return WebResult.ok().data(userProfileService.resultSort(name,employeeId,level));
+    }
+
 
 }

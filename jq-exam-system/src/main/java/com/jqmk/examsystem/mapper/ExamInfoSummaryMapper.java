@@ -6,10 +6,7 @@ import com.jqmk.examsystem.dto.ExamLearnTime;
 import com.jqmk.examsystem.dto.ExamRecordDto;
 import com.jqmk.examsystem.dto.export.ExportExamRecord;
 import com.jqmk.examsystem.entity.ExamInfoSummary;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +26,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("SELECT ex.id,`user`.username,user.dept_name,user.job_type,ex.`name`,ex.start_time,ex.end_time,ex.score,sum(ar.answer_correct+ar.answer_wrong+ar.no_reply) as answerCount, " +
             "ar.answer_correct,ar.answer_wrong,ar.no_reply,ex.exam_results,timediff(ex.end_time,ex.start_time) as unavailable FROM `user`,test_paper,exam_info_summary as ex,answers_records as ar " +
             "where user.id = ex.user_id and user.id = ar.user_id and test_paper.id = ar.test_paper_id and ex.test_paper_id = ar.test_paper_id and ar.exam_info_summary_id = ex.id AND (#{userId} IS NULL OR user.id = #{userId}) " +
-            " and test_paper.no_challenge=#{noChallenge} GROUP BY ar.id limit ${page}, ${pageSize} ")
+            " and test_paper.no_challenge=#{noChallenge} GROUP BY ar.id ORDER BY ex.end_time desc  limit ${page}, ${pageSize} ")
     List<ExamRecordDto> selectMain(Integer userId,Integer noChallenge, Long page, Long pageSize);
     @Select("SELECT count(*) FROM `user`,test_paper,exam_info_summary as ex,answers_records as ar " +
             "where user.id = ex.user_id and user.id = ar.user_id and test_paper.id = ar.test_paper_id and ex.test_paper_id = ar.test_paper_id and ar.exam_info_summary_id = ex.id AND (#{userId} IS NULL OR user.id = #{userId}) and test_paper.no_challenge=#{noChallenge}")
@@ -40,7 +37,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "where user.id = ex.user_id and user.id = ar.user_id and test_paper.id = ar.test_paper_id and ex.test_paper_id = ar.test_paper_id and ar.exam_info_summary_id = ex.id AND (#{userId} IS NULL OR user.id = #{userId}) " +
             "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime} ) " +
             "AND (#{name} IS NULL OR ex.name = #{name}) AND (#{examResults} IS NULL OR ex.exam_results = #{examResults}) AND (#{deptName} IS NULL OR user.dept_name = #{deptName}) AND (#{jobType} IS NULL OR user.job_type = #{jobType}) " +
-            "AND (#{username} IS NULL OR user.username = #{username}) and test_paper.no_challenge=#{noChallenge} GROUP BY ar.id limit ${page}, ${pageSize} ")
+            "AND (#{username} IS NULL OR user.username = #{username}) and test_paper.no_challenge=#{noChallenge} GROUP BY ar.id ORDER BY ex.end_time desc limit ${page}, ${pageSize} ")
     List<ExamRecordDto> selectCondition(Integer userId, String startTime, String endTime, String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge, Long page, Long pageSize);
 
     @Select("SELECT count(*) FROM `user`,test_paper,exam_info_summary as ex,answers_records as ar " +
@@ -49,24 +46,33 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "AND (#{name} IS NULL OR ex.name = #{name}) AND (#{examResults} IS NULL OR ex.exam_results = #{examResults}) AND (#{deptName} IS NULL OR user.dept_name = #{deptName}) AND (#{jobType} IS NULL OR user.job_type = #{jobType}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) and test_paper.no_challenge=#{noChallenge} ")
     Integer countCondition(Integer userId, String startTime, String endTime,String name, Integer examResults, String deptName, String jobType, String username,Integer noChallenge);
-    @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,SUM(test_paper.learning_score) as credits ,ex.end_time " +
-            "FROM `user`,exam_info_summary as ex,test_paper where ex.user_id =user.id GROUP BY user.username,ex.id order by end_time desc  limit ${page},${pageSize} ")
+    @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,ex.obtain_learning_time,ex.end_time " +
+            "FROM `user`,exam_info_summary as ex where ex.user_id =user.id GROUP BY user.username,ex.id order by end_time desc  limit ${page},${pageSize} ")
     List<ExamLearnScore> viewInterface(Long page, Long pageSize);
     @Select("SELECT COUNT(*) FROM `user`,exam_info_summary as ex where ex.user_id =user.id")
     Integer viewInterfaceCount();
 
-    @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,ex.end_time FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
+    @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_score,ex.obtain_learning_time,ex.end_time " +
+            "FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) " +
-            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id order by ex.end_time desc limit ${page}, ${pageSize} ")
+            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) " +
+            "and ex.user_id =user.id order by ex.end_time desc limit ${page}, ${pageSize} ")
     List<ExamLearnScore> selectLearnScore(String deptName, String username, String name, String startTime, String endTime, Long page, Long pageSize);
+    @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_time,ex.end_time,test_paper.learning_time  " +
+            "FROM `user`,exam_info_summary as ex,test_paper where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
+            "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) and ex.user_id =user.id " +
+            "and test_paper.id = ex.test_paper_id order by ex.end_time desc limit ${page}, ${pageSize} ")
+    List<ExamLearnTime> selectLearnTime(String deptName, String username, String name, Long page, Long pageSize);
+
+
     @Select("SELECT count(*) FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) " +
             "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id ")
     Integer selectLearnScoreCount(String deptName, String username, String name, String startTime, String endTime);
 
-    @Select("SELECT `user`.username,user.dept_name,ex.`name`,sum(ex.obtain_learning_score) as obtainLearningScore, ex.end_time FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
+    @Select("SELECT `user`.username,user.dept_name,ex.`name`,sum(ex.obtain_learning_score) as obtainLearningScore,sum(ex.obtain_learning_time) as obtainLearningTime, ex.end_time FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) " +
-            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id group by ex.name order by ex.end_time desc limit ${page}, ${pageSize} ")
+            "AND ((#{startTime} and #{endTime}) IS NULL OR ex.end_time >= #{startTime} AND ex.end_time <= #{endTime}) and ex.user_id =user.id group by user.username order by ex.end_time desc limit ${page}, ${pageSize} ")
     List<ExamLearnScore> learnScoreCondition(String deptName, String username, String name, String startTime, String endTime, Long page, Long pageSize);
     @Select("SELECT COUNT(DISTINCT ex.name)  FROM `user`,exam_info_summary as ex where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) " +
@@ -79,10 +85,6 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
 
     @Select("SELECT count(*) FROM `user`,exam_info_summary as ex,test_paper where  ex.user_id =user.id and test_paper.`name` = ex.`name` ")
     Integer learnTimeInterfaceCount();
-
-    @Select("SELECT `user`.username,user.dept_name,ex.`name`,ex.obtain_learning_time,ex.end_time,test_paper.learning_time  FROM `user`,exam_info_summary as ex,test_paper where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
-            "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) and ex.user_id =user.id and test_paper.id = ex.test_paper_id order by ex.end_time desc limit ${page}, ${pageSize} ")
-    List<ExamLearnTime> selectLearnTime(String deptName, String username, String name, Long page, Long pageSize);
 
     @Select("SELECT  count(*) FROM `user`,exam_info_summary as ex,test_paper where (#{deptName} IS NULL OR user.dept_name = #{deptName}) " +
             "AND (#{username} IS NULL OR user.username = #{username}) AND (#{name} IS NULL OR ex.name = #{name}) and ex.user_id =user.id and test_paper.id = ex.test_paper_id ")
@@ -143,15 +145,16 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "  AND TIMESTAMPDIFF(MINUTE, eis.start_time, #{now}) > tp.duration; ")
     List<ExamInfoSummary> findTimeoutRecords(LocalDateTime now);
 
-    @Select("SELECT sum(exam_results!=1) as nopass,sum(exam_results=1) as pass FROM `exam_info_summary` WHERE DATE(end_time) = CURDATE()")
-    Map<String, Object> passRatePie();
+    @Select("SELECT sum(exam_results!=1) as nopass,sum(exam_results=1) as pass FROM `exam_info_summary` WHERE test_paper_id=#{testId} ")
+    Map<String, Object> passRatePie(Integer testId);
 
     @Select("SELECT sum(exam_results!=1) as nopass,sum(exam_results=1) as pass,DATE(end_time) as date FROM `exam_info_summary` " +
             "WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(end_time) GROUP BY DATE(end_time)  ORDER BY date ")
     List<Map<String, Object>> passRateHistogram();
 
-    @Select("SELECT count(DISTINCT user.id) as total,count(DISTINCT es.id) as examNum FROM `exam_info_summary` as es,`user` WHERE DATE(es.end_time) = CURDATE() ")
-    Map<String, Object> takeTestNum();
+    @Select("SELECT LENGTH(t.exam_crowd_ids)-LENGTH(REPLACE(t.exam_crowd_ids,',',''))+1 as num,count(DISTINCT es.user_id) as examNum " +
+            "FROM `exam_info_summary` as es,test_paper as t WHERE es.test_paper_id=#{testId} and es.test_paper_id=t.id")
+    Map<String, Object> takeTestNum(Integer testId);
 
     @Select("SELECT count(id) as total,DATE(end_time) as date FROM `exam_info_summary` WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(end_time) GROUP BY DATE(end_time)  ORDER BY date")
     List<Map<String, Object>> takeTestNumHistogram();
@@ -168,4 +171,87 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "GROUP BY user.dept_name ORDER BY low desc LIMIT 10")
     List<Map<String, Object>> riskHistogram();
 
+
+    @Select("SELECT MAX(es.score) as max,MIN(es.score) as min,AVG(es.score) as avg,COUNT(DISTINCT es.user_id) as joinNum,es.name,length(t.exam_crowd_ids)+1 - length(REPLACE(t.exam_crowd_ids,',','')) AS allNum,t.id as id " +
+            "from exam_info_summary AS es,test_paper as t WHERE t.id=es.test_paper_id GROUP BY es.name")
+    List<Map<String, Object>> scoreDetail();
+
+    @Select("SELECT es.score,`user`.username from exam_info_summary as es,user WHERE user.id=es.user_id and es.test_paper_id =#{id} GROUP BY es.user_id ORDER BY es.update_time desc ")
+    List<Map<String, Object>> selectExamDetails(Integer id);
+
+    @Select("select " +
+            "sum(case when score between 0 and 59 then 1 else 0 end) as failing, " +
+            "sum(case when score between 60 and 69 then 1 else 0 end) as competency, " +
+            "sum(case when score between 70 and 79 then 1 else 0 end) as proficiency , " +
+            "sum(case when score between 80 and 89 then 1 else 0 end) as good, " +
+            "sum(case when score between 90 and 100 then 1 else 0 end) as excellent " +
+            "from exam_info_summary where test_paper_id=#{id}")
+    Map<String, Object> selectTableData(Integer id);
+
+    @Select("SELECT DISTINCT user.username from exam_info_summary as es,user WHERE es.user_id=user.id and es.test_paper_id=#{id}")
+    List<String> selectExamPeople(Integer id);
+
+    @Select("select exam_crowd_ids from test_paper where id = #{id}")
+    List<String> selectAllExamPeople(Integer id);
+
+    @Select("SELECT es.`name`,user.dept_name as deptName,MAX(es.score) AS max,MIN(es.score) as min ,AVG(es.score) as avg " +
+            "FROM exam_info_summary as es,user where es.user_id=user.id and es.test_paper_id=#{id} and (#{time} IS NULL OR DATE(es.end_time) = #{time} ) " +
+            "GROUP BY user.dept_name ORDER BY avg desc limit 0,#{size}")
+    List<Map<String, Object>> selectExamPercentage(String time, Integer id,Integer size);
+
+    @Select("select test_paper_id from exam_info_summary order by update_time desc limit 0,1")
+    Integer selectTestId();
+
+    @Select("SELECT sum(es.exam_results!=1) as nopass,sum(es.exam_results=1) as pass,user.dept_name as deptName from exam_info_summary as es,test_paper as t,`user` " +
+            "WHERE es.test_paper_id=t.id and t.id=#{testId} and (#{time} IS NULL OR DATE(es.end_time) = #{time}) and user.id=es.user_id group by user.dept_name ORDER BY pass desc limit 0,#{size}")
+    List<Map<String, Object>> selectExamHistogram(String time, Integer testId, Integer size);
+
+    @Select("SELECT q.bank_name as bankName,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.exam_results),decimal(10,2)),'') as pass," +
+            "CONCAT(convert(SUM(es.exam_results!=1)*100/count(es.exam_results),decimal(10,2)),'') as nopass " +
+            "from exam_info_summary as es,test_paper as t,question_bank as q " +
+            "where es.test_paper_id=t.id and t.question_bank_id=q.id and es.test_paper_id in (${ids})GROUP BY q.bank_name ORDER BY pass desc limit 0,#{size}")
+    List<Map<String, Object>> scoreHistogram(Integer size,String ids);
+
+    @Select("select COUNT(DISTINCT user_id) FROM exam_info_summary")
+    Integer countPeople();
+
+    @Select("SELECT sum(LENGTH(t.exam_crowd_ids)-LENGTH(REPLACE(t.exam_crowd_ids,',',''))) as num FROM test_paper as t")
+    Double countNumber();
+
+    @Select("SELECT COUNT(*) from exam_info_summary where exam_results=1")
+    Double selectPassNum();
+
+    @Select("select COUNT(*) as num,user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id and es.exam_results=2 group by user.dept_name having count(*) >=1")
+    List<Map<String, Object>> annularPie();
+
+    @Select("SELECT count(es.user_id) as total,user.username,user.dept_name as deptName FROM exam_info_summary as es,user " +
+            "WHERE es.user_id=user.id and DATE(es.end_time)>=#{starTime} AND DATE(es.end_time)<=#{endTime} GROUP BY user.username ORDER BY total desc limit 0,10")
+    List<Map<String, Object>> numRank(String starTime, String endTime);
+
+    @Select("select id,name from test_paper order by update_time desc")
+    List<Map<String, Object>> getTestId();
+
+    @Select("SELECT MONTH(es.end_time) as month,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.id),decimal(10,0)),'') as percentage " +
+            "FROM exam_info_summary as es GROUP BY MONTH(es.end_time) ORDER BY MONTH(es.end_time) ")
+    List<Map<String, Object>> passRate();
+
+    @Select("SELECT SUM(es.exam_results!=1) as num,user.username,user.dept_name as deptName FROM exam_info_summary as es,user " +
+            "WHERE es.user_id=user.id GROUP BY user.username ORDER BY num DESC limit 0,10")
+    List<Map<String, Object>> noPassList();
+
+    @Select("SELECT user.username,user.dept_name as deptName, AVG(es.score) as avg,COUNT(es.id) as total FROM exam_info_summary as es,user " +
+            "where es.user_id=user.id and DATE(es.end_time)>=#{starTime} AND DATE(es.end_time)<=#{endTime} GROUP BY user.username ORDER BY avg DESC limit 0,10")
+    List<Map<String, Object>> scoreRate(String starTime, String endTime);
+
+    @Select("SELECT DISTINCT dept_name as deptName from user ORDER BY dept_name desc limit 0,#{size}")
+    List<Map<String, Object>> selectDeptName(Integer size);
+
+    @Delete("DELETE from user_error_records where id=#{id}")
+    void delWrongById(Integer id);
+
+    @Delete("DELETE from user_error_records where user_id=#{userId}")
+    void delWrongByUserId(Integer userId);
+
+    @Select("select test_paper_id as testId,name from exam_info_summary order by update_time desc limit 0,1")
+    Map<String, Object> getTestName();
 }

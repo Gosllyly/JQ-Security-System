@@ -8,6 +8,7 @@ import com.jqmk.examsystem.entity.TestPaper;
 
 import javax.servlet.http.HttpServletResponse;
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -30,4 +31,12 @@ public interface QuestionService extends IService<Question> {
     boolean ifQuestionCountIsLegal(TestPaper testPaper);
 
     String selectByBankId(Integer questionBankId,HttpServletResponse response);
+
+    Page selectBaseBankByPage(Long page, Long pageSize);
+
+    Page queryQuestionPage(String stem, Integer type, Long page, Long pageSize);
+
+    void restoreQuestion(String ids);
+
+    Map<String, Object> viewDelQuestion(Long page, Long pageSize);
 }

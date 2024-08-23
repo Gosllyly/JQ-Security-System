@@ -10,6 +10,7 @@ import com.jqmk.examsystem.framwork.config.JsonTypeHandler;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * <p>
@@ -70,9 +71,9 @@ public interface QuestionMapper extends BaseMapper<Question> {
             @Result(property = "errorOptions", column = "error_options", typeHandler = JsonTypeHandler.class)
     })
     @Select("select DISTINCT(stem),id,user_id,question_bank_name,options,correct_options,analysis,type,error_options,create_time from user_error_records " +
-            "where user_id =#{userId} GROUP BY user_id,stem ORDER BY create_time desc limit ${page}, ${pageSize}")
+            "where user_id =#{userId} GROUP BY create_time,stem ORDER BY create_time DESC limit ${page}, ${pageSize}")
     List<WrongQuestion> selectErrorQuestion(Integer userId,Long page,Long pageSize);
-    @Select("select COUNT(DISTINCT stem) from user_error_records where user_id =#{userId} ")
+    @Select("select COUNT(stem) from user_error_records where user_id =#{userId} ")
     Integer countErrorQuestion(Integer userId);
 
     @Insert("INSERT INTO user_error_records(`user_id`, `question_bank_name`,`stem`,`options`,`correct_options`,`analysis`,`type`,`error_options`) " +
@@ -85,9 +86,9 @@ public interface QuestionMapper extends BaseMapper<Question> {
             @Result(property = "errorOptions", column = "error_options", typeHandler = JsonTypeHandler.class)
     })
     @Select("select DISTINCT(stem),id,user_id,question_bank_name,options,correct_options,analysis,type,error_options,create_time from user_error_records " +
-            "where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') and (#{type} IS NULL OR type = #{type}) GROUP BY user_id,stem ORDER BY create_time desc limit ${page}, ${pageSize}")
+            "where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') and (#{type} IS NULL OR type = #{type}) GROUP BY create_time,stem ORDER BY create_time desc limit ${page}, ${pageSize}")
     List<WrongQuestion> errorQuestionCondition(Integer userId, Integer type, String stem, Long page, Long pageSize);
-    @Select("select COUNT(DISTINCT stem) from user_error_records where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') " +
+    @Select("select COUNT(stem) from user_error_records where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') " +
             "and (#{type} IS NULL OR type = #{type}) ")
     Integer countErrorQuestionCondition(Integer userId, Integer type, String stem);
 
@@ -113,4 +114,20 @@ public interface QuestionMapper extends BaseMapper<Question> {
 //    })
     @Select("select stem,options,correct_options,analysis,type,status from question WHERE  question_bank_id = #{questionBankId}")
     List<ExportQuestion> selectByBankId(Integer questionBankId);
+
+    @Select("SELECT COUNT(*) as amount,SUM(type=1) as radio,SUM(type=2) as multiple,SUM(type=3) as judge from question WHERE `status`=0")
+    Map<String, Object> countQuestion();
+
+    @Update("UPDATE `question` SET `status` = 0 WHERE id in (${idData})")
+    void restoreQuestion(String idData);
+
+    @Select("select count(*) from question where status = 1")
+    Integer selectDelCount();
+
+    @Results({
+            @Result(property = "options", column = "options", typeHandler = JsonTypeHandler.class),
+            @Result(property = "correctOptions", column = "correct_options", typeHandler = JsonTypeHandler.class)
+    })
+    @Select("select id,stem,options,correct_options,type,analysis from question where status = 1 order by update_time desc limit #{page},#{pageSize}")
+    List<ExamQuestion> viewDelQuestion(Long page, Long pageSize);
 }

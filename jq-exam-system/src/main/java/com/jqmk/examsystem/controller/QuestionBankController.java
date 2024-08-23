@@ -51,7 +51,13 @@ public class QuestionBankController {
     @GetMapping("/main")
     public WebResult viewMain() {
         List<QuestionBank> questionBankList = questionBankService.list(
-                new QueryWrapper<QuestionBank>().orderByDesc("update_time"));
+                new QueryWrapper<QuestionBank>().eq("status",0).orderByDesc("update_time"));
+        return WebResult.ok().data(questionBankList);
+    }
+    @GetMapping("/queryBankName")
+    public WebResult queryBankName(@RequestParam String bankName) {
+        List<QuestionBank> questionBankList = questionBankService.list(
+                new QueryWrapper<QuestionBank>().like("bank_name",bankName).eq("status",0).orderByDesc("update_time"));
         return WebResult.ok().data(questionBankList);
     }
 

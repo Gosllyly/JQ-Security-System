@@ -72,16 +72,64 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
 
     @Override
     public Map<String, Object> violationCount(String name, String employeeId) {
-        String data = jqSecurityCheckMapper.selectData(name,employeeId);
-        List<Map<String, Object>> wearDataNum = jqSecurityCheckMapper.selectWearCount(name,employeeId,data);
-        Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name,data);
-        Integer noWear = jqSecurityCheckMapper.noWearCount(name,data);
-        Integer violationNumber = userProfileMapper.count(data,name,employeeId);
+        //String data = jqSecurityCheckMapper.selectData(name,employeeId);
+        List<Map<String, Object>> wearDataNum = jqSecurityCheckMapper.selectWearCount(name,employeeId);
+        Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name);
+        Integer noWear = jqSecurityCheckMapper.noWearCount(name);
+        Integer violationNumber = userProfileMapper.count(name,employeeId);
         Map<String, Object> result = new HashMap<>();
         result.put("violationNumber",violationNumber);//下井违规
         result.put("wearDataNum",wearDataNum);//穿戴违规
         result.put("noWear",noWear);//未穿戴总次数
         result.put("wrongWear",wrongWear);//穿戴不规范总次数
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> resultSort(String name, String employeeId,String level) {
+        Integer sort = userProfileMapper.viewResultSort(name,employeeId,level);
+        Integer all = userProfileMapper.viewResultAll(level);
+        Map<String, Object> result = new HashMap<>();
+        result.put("sort",sort);//排名
+        result.put("amount",all);//总人数
+        return result;
+    }
+
+    @Override
+    public Map<String, Object> riskPie(String time) {
+//        Map<String, Object> result = new HashMap<>();
+//        result.put("nowPie",userProfileMapper.riskPie());//排名
+//        if (time==null) {
+//            result.put("otherPie",userProfileMapper.riskPieYesterday());//默认昨天
+//        }else {
+//            result.put("otherPie",userProfileMapper.riskPieOtherDay(time));//自定义天数
+//        }
+        return null;
+    }
+
+    @Override
+    public List<Map<String, Object>> riskPercentage(String startTime, Integer type) {
+        if (type==1) {
+            return userProfileMapper.riskPercentage(startTime);
+        }else if (type==2) {
+            return userProfileMapper.riskPercentageByWeek(startTime);
+        }else if (type==3) {
+            return userProfileMapper.riskPercentageByMonth(startTime);
+        }else {
+            return userProfileMapper.riskPercentageByMonth(startTime);
+        }
+    }
+
+    @Override
+    public Map<String, Object> selectByName(String name) {
+        String names = String.valueOf(StringsUtil.strAdd(name));
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        List<UserProfileInfoDto> lowPeople= userProfileMapper.selectByName(names,"低风险");
+        result.put("low",lowPeople);
+        List<UserProfileInfoDto> mediumPeoples= userProfileMapper.selectByName(names,"中风险");
+        result.put("medium",mediumPeoples);
+        List<UserProfileInfoDto> highPeoples= userProfileMapper.selectByName(names,"高风险");
+        result.put("high",highPeoples);
         return result;
     }
 
