@@ -98,19 +98,18 @@ public class TestPaper implements Serializable {
     /**
      * 考试开始时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime startTime;
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private String startTime;
 
     /**
      * 考试结束时间
      */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
-    private LocalDateTime endTime;
+    //@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
+    private String endTime;
 
     /**
      * 状态，默认0代表正常，1代表禁用
      */
-    @TableLogic
     private Integer status;
 
     /**

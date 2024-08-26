@@ -26,11 +26,11 @@ public interface UserMapper extends BaseMapper<User> {
     List<String> selectByConditionOR(String deptNames,String name);
 
     @Select("SELECT distinct user.username FROM user,user_profile_data as up WHERE (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
-            "and (#{name} IS NULL OR user.username LIKE '${name}%') and (#{riskPeople} IS NULL OR up.level LIKE '${riskPeople}%'))")
+            "and (#{name} IS NULL OR user.username LIKE '${name}%') and up.level = #{riskPeople} and to_days(up.creat_time) = to_days(now()) and user.username=up.username")
     List<String> selectByConditionOther(String deptNames,String name,String riskPeople);
 
-    @Select("SELECT distinct user.username FROM user,user_profile_data as up WHERE user.job_type in (${jobTypes})  AND (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
-            "and (#{name} IS NULL OR user.username LIKE '${name}%') and (#{riskPeople} IS NULL OR up.level LIKE '${riskPeople}%')")
+    @Select("SELECT distinct user.username FROM user,user_profile_data as up WHERE user.job_type in (${jobTypes}) AND (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR user.username LIKE '${name}%') and up.level = #{riskPeople} and to_days(up.creat_time) = to_days(now()) and user.username=up.username")
     List<String> selectByConditionAll(String deptNames,String jobTypes, String name,String riskPeople);
 
     @Update("UPDATE user " +

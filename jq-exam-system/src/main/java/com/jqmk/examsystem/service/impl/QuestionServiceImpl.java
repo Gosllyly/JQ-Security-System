@@ -110,9 +110,12 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
     @Override
     public void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary,String wrong,Integer userId) {
-        Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
-        TestPaper testPaper = testPaperService.getById(id);//分值
-        questionMapper.addWrongsInfo(questionId, StringsUtil.strToList(wrong),userId);
+//        Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
+//        TestPaper testPaper = testPaperService.getById(id);//分值
+        String stem = questionMapper.selectStem(Integer.valueOf(questionId));
+        if (questionMapper.countWrongQuestion(stem)<1) {
+            questionMapper.addWrongsInfo(questionId, StringsUtil.strToList(wrong),userId);
+        }
 //        if (type==1) {//单选
 //            examInfoSummaryMapper.subtractScore(testPaper.getSingleChoiceScore(),examSummary);
 //        }else if (type==2) {//多选

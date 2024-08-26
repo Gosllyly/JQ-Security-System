@@ -22,11 +22,11 @@ public interface JQSecurityCheckMapper {
     @Select("select imgFile from employee_info where name = #{username} and employeeId = #{employeeId} order by updatedTime desc limit 0,1")
     String selectImage(String username, String employeeId);
 
-    @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history_copy` " +
+    @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history` " +
             "where  personName=#{name} and employeeId=#{employeeId} order by detectTime desc limit 7")
     List<UserBehavior> queryBehavior(String employeeId, String name);
 
-    @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history_copy` " +
+    @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history` " +
             "where  personName=#{name} order by detectTime desc limit 4")
     List<UserBehavior> wearDataNum(String name);
 

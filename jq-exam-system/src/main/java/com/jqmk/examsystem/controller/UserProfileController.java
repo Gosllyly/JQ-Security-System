@@ -6,6 +6,7 @@ import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.dto.userProfile.UserProfileSelectDto;
 import com.jqmk.examsystem.mapper.UserProfileMapper;
 import com.jqmk.examsystem.service.UserProfileService;
+import lombok.extern.log4j.Log4j2;
 import net.sf.json.JSONObject;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +20,7 @@ import java.util.List;
  * @Description 用户画像相关接口
  */
 @RestController
+@Log4j2
 @RequestMapping("/portrait")
 public class UserProfileController {
 

@@ -6,6 +6,7 @@ import com.jqmk.examsystem.dto.TestPaperChallengeDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.TestPaper;
 import com.jqmk.examsystem.mapper.TestPaperMapper;
+import com.jqmk.examsystem.service.QuestionService;
 import com.jqmk.examsystem.service.TestPaperService;
 import com.jqmk.examsystem.utils.TestPaperUtil;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +30,9 @@ public class ChallengeTestController {
     @Resource
     private TestPaperMapper testPaperMapper;
 
+    @Resource
+    private QuestionService questionService;
+
     @GetMapping("/main")
     public WebResult viewMain() {
         List<TestPaper> testPaperList = testPaperMapper.selectList(new QueryWrapper<TestPaper>()
@@ -44,9 +48,13 @@ public class ChallengeTestController {
     }
     @PostMapping("/add")
     public WebResult addTestPaperRuler(@RequestBody TestPaper testPaper) {
+        //判断各个题型数量设置是否合法
+        if(!questionService.ifQuestionCountIsLegal(testPaper)){
+            return WebResult.fail().message("题库中相应类型题目数量不足");
+        }
         // 验证单选题、多选题和判断题的分数总和是否等于 100 分
         if(!TestPaperUtil.ifSumLegal(testPaper)){
-            return WebResult.fail().message("创建失败！分值总和应为100");
+            return WebResult.fail().message("更新失败！分值总和应为100");
         }
         //testPaper.setExamCategoryId(0);
         testPaper.setNoChallenge(1);
@@ -56,6 +64,10 @@ public class ChallengeTestController {
 
     @PostMapping("/update")
     public WebResult updateTestPaperRuler(@RequestBody TestPaper testPaper) {
+        //判断各个题型数量设置是否合法
+        if(!questionService.ifQuestionCountIsLegal(testPaper)){
+            return WebResult.fail().message("题库中相应类型题目数量不足");
+        }
         // 验证单选题、多选题和判断题的分数总和是否等于 100 分
         if(!TestPaperUtil.ifSumLegal(testPaper)){
             return WebResult.fail().message("更新失败！分值总和应为100");

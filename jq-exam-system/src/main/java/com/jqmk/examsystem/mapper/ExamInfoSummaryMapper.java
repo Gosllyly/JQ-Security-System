@@ -209,7 +209,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("SELECT q.bank_name as bankName,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.exam_results),decimal(10,2)),'') as pass," +
             "CONCAT(convert(SUM(es.exam_results!=1)*100/count(es.exam_results),decimal(10,2)),'') as nopass " +
             "from exam_info_summary as es,test_paper as t,question_bank as q " +
-            "where es.test_paper_id=t.id and t.question_bank_id=q.id and es.test_paper_id in (${ids})GROUP BY q.bank_name ORDER BY pass desc limit 0,#{size}")
+            "where es.test_paper_id=t.id and t.question_bank_id=q.id and es.test_paper_id in (${ids}) GROUP BY q.bank_name ORDER BY pass desc limit 0,#{size}")
     List<Map<String, Object>> scoreHistogram(Integer size,String ids);
 
     @Select("select COUNT(DISTINCT user_id) FROM exam_info_summary")

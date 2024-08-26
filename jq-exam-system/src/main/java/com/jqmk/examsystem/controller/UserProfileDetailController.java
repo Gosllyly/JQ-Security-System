@@ -41,7 +41,7 @@ public class UserProfileDetailController {
         Page profileInfoPage =  userProfileInfoPage.setRecords(userProfileService.page(userProfileInfoPage,new QueryWrapper<UserProfileInfo>()
                 .select("username","employee_id","level")
                 .ge("creat_time",LocalDate.now())
-                .notLike("level","数据不足")
+                .notLike("level","null")
                 .last("order by field(level,\"高风险\",\"中风险\",\"低风险\")")).getRecords());
         profileInfoPage.setRecords(BeanUtil.copyToList(profileInfoPage.getRecords(), UserProfileDetailDto.class));
         return WebResult.ok().data(profileInfoPage);

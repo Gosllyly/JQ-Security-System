@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.QuestionCollection;
+import com.jqmk.examsystem.mapper.QuestionMapper;
 import com.jqmk.examsystem.service.QuestionCollectionService;
+import com.jqmk.examsystem.utils.StringsUtil;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -24,7 +26,8 @@ public class QuestionCollectionController {
 
     @Resource
     private QuestionCollectionService questionCollectionService;
-
+    @Resource
+    private QuestionMapper questionMapper;
 
     @GetMapping("/main")
     public WebResult viewCollectionMain(Integer userId, Long page, Long pageSize) {
@@ -36,8 +39,13 @@ public class QuestionCollectionController {
 
     @PostMapping("/add")
     public WebResult addCrowdManage(@RequestBody QuestionCollection questionCollection) {
-        questionCollectionService.collection(questionCollection);
-        return WebResult.ok().message("收藏题目成功");
+        String stem = questionMapper.selectStem(Math.toIntExact(questionCollection.getQuestionId()));
+        if (questionMapper.countCollectionQuestion(stem,questionCollection.getUserId())<1) {
+            questionCollectionService.collection(questionCollection);
+            return WebResult.ok().message("收藏题目成功");
+        }else {
+            return WebResult.fail().message("该题目已被收藏，请勿重复收藏");
+        }
     }
 
     @DeleteMapping("/delete")

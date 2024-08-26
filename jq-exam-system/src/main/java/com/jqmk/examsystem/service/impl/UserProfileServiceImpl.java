@@ -51,7 +51,16 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
                 userProfileInfo.setLevel("null");
                 userProfileInfo.setReason(result.getJSONObject(i).getString("level"));
                 save(userProfileInfo);
-            }else {
+            }else if (userProfileInfo.getLevel().equals("低风险")){
+                userProfileInfo.setScore(100);
+                userProfileInfo.setLevel(result.getJSONObject(i).getString("level"));
+                save(userProfileInfo);
+            }else if (userProfileInfo.getLevel().equals("中风险")){
+                userProfileInfo.setScore(90);
+                userProfileInfo.setLevel(result.getJSONObject(i).getString("level"));
+                save(userProfileInfo);
+            }else if (userProfileInfo.getLevel().equals("高风险")){
+                userProfileInfo.setScore(75);
                 userProfileInfo.setLevel(result.getJSONObject(i).getString("level"));
                 save(userProfileInfo);
             }

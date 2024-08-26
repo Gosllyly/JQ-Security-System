@@ -90,7 +90,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("select count(*) from user_profile_data where to_days(creat_time) = to_days(now())")
     Integer countToday();
 
-    @Select("select id,username,employee_id from user_profile_data order by id  limit #{i},1")
+    @Select("select id,username,employee_id from user_profile_data  where to_days(creat_time) = to_days(now()) order by id  limit #{i},1")
     ResultSort selectId(Integer i);
 
     @Select("UPDATE user_profile_data SET score=score-#{violationNumber} WHERE id = #{id} ")
@@ -99,7 +99,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT `rank`" +
             "FROM (" +
             "    SELECT username, score,level,creat_time, ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
-            "    FROM user_profile_data " +
+            "    FROM user_profile_data where to_days(creat_time) = to_days(now()) " +
             ") AS ranked_table " +
             "WHERE username = #{name} and `level`=#{level} and to_days(creat_time) = to_days(now()) order by creat_time desc limit 0,1")
     Integer viewResultSort(String name, String employeeId,String level);

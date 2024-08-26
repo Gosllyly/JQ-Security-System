@@ -44,7 +44,7 @@ public class TimedTask {
     private UserProfileMapper userProfileMapper;
 
 
-    //@Scheduled(cron = "0 0/10 13 * * ?")
+    //@Scheduled(cron = "0 0 13 * * ?")
     public void syncEmployeeInfoMas() throws URISyntaxException {
         String loginAddress = masInteractiveConfig.getServiceAddress() + masInteractiveConfig.getLoginUrl();
         Map<String, Object> loginBody = new HashMap<>();
@@ -84,6 +84,8 @@ public class TimedTask {
                 // 没有 idCard 的员工信息不同步
                 if (person.getIDCard() == null || person.getIDCard().length() == 0)
                     continue;
+                if (person.getEmployee() == null || person.getEmployee().length() == 0)
+                    continue;
                 String imageUrl = masInteractiveConfig.getServiceAddress() + person.getImgFile();
                 String image = person.getImgFile() == null ? null : HttpClientUtil.httpGetImage(imageUrl, new Pair<>("token", token));
                 User user = User.builder()
@@ -97,7 +99,7 @@ public class TimedTask {
                         .createDate(person.getUpdatedTime())
                         .build();
                 User old = userMapper.selectByCardNoAndName(user.getIdCard(), user.getUsername());
-                log.info(String.valueOf(old));
+                log.info(old.getUsername()+old.getEmployeeId());
                 // 新增或者更新
                 if (old == null) {
                     userMapper.insertUser(user);
@@ -109,8 +111,9 @@ public class TimedTask {
         }
         log.info("从梅安森同步用户数据成功...");
     }
-    //@Scheduled(cron = "0 */1 * * * ?")
+    //@Scheduled(cron = "0 0 6 * * ?")
     public void CalculateScore () {
+        log.info("开始打分");
         //先统计多少人今天违章的
         Integer amount = userProfileMapper.countToday();
         for (int i = 0; i < amount; i++) {//循环，对每个人的分数进行修改
@@ -124,5 +127,6 @@ public class TimedTask {
             Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name);
             userProfileMapper.deductPoints(resultSort.getId(),wrongWear);//统计穿戴不规范次数
         }
+        log.info("已打分");
     }
 }

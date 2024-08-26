@@ -42,6 +42,8 @@ public class UserProfileInfo {
 
     private String level;
 
+    private Integer score;
+
     private String reason;
 
 }

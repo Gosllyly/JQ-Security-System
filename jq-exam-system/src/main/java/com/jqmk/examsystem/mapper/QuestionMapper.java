@@ -71,9 +71,9 @@ public interface QuestionMapper extends BaseMapper<Question> {
             @Result(property = "errorOptions", column = "error_options", typeHandler = JsonTypeHandler.class)
     })
     @Select("select DISTINCT(stem),id,user_id,question_bank_name,options,correct_options,analysis,type,error_options,create_time from user_error_records " +
-            "where user_id =#{userId} GROUP BY create_time,stem ORDER BY create_time DESC limit ${page}, ${pageSize}")
+            "where user_id =#{userId} GROUP BY stem ORDER BY create_time DESC limit ${page}, ${pageSize}")
     List<WrongQuestion> selectErrorQuestion(Integer userId,Long page,Long pageSize);
-    @Select("select COUNT(stem) from user_error_records where user_id =#{userId} ")
+    @Select("select COUNT(DISTINCT stem) from user_error_records where user_id =#{userId} ")
     Integer countErrorQuestion(Integer userId);
 
     @Insert("INSERT INTO user_error_records(`user_id`, `question_bank_name`,`stem`,`options`,`correct_options`,`analysis`,`type`,`error_options`) " +
@@ -86,9 +86,9 @@ public interface QuestionMapper extends BaseMapper<Question> {
             @Result(property = "errorOptions", column = "error_options", typeHandler = JsonTypeHandler.class)
     })
     @Select("select DISTINCT(stem),id,user_id,question_bank_name,options,correct_options,analysis,type,error_options,create_time from user_error_records " +
-            "where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') and (#{type} IS NULL OR type = #{type}) GROUP BY create_time,stem ORDER BY create_time desc limit ${page}, ${pageSize}")
+            "where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') and (#{type} IS NULL OR type = #{type}) GROUP BY stem ORDER BY create_time desc limit ${page}, ${pageSize}")
     List<WrongQuestion> errorQuestionCondition(Integer userId, Integer type, String stem, Long page, Long pageSize);
-    @Select("select COUNT(stem) from user_error_records where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') " +
+    @Select("select COUNT(DISTINCT stem) from user_error_records where user_id =#{userId} and (#{stem} IS NULL OR stem like '%${stem}%') " +
             "and (#{type} IS NULL OR type = #{type}) ")
     Integer countErrorQuestionCondition(Integer userId, Integer type, String stem);
 
@@ -130,4 +130,13 @@ public interface QuestionMapper extends BaseMapper<Question> {
     })
     @Select("select id,stem,options,correct_options,type,analysis from question where status = 1 order by update_time desc limit #{page},#{pageSize}")
     List<ExamQuestion> viewDelQuestion(Long page, Long pageSize);
+
+    @Select("SELECT count(*) from user_error_records WHERE stem=#{stem}")
+    Integer countWrongQuestion(String stem);
+
+    @Select("select stem from question where id =#{questionId}")
+    String selectStem(Integer questionId);
+
+    @Select("select count(*) from question_collection where stem=#{stem} and user_id=#{userId}")
+    Integer countCollectionQuestion(String stem, Integer userId);
 }
