@@ -62,4 +62,9 @@ public class QuestionCollectionController {
                 .orderByDesc("collection_time")).getRecords());
         return WebResult.ok().data(examCrowdManages);
     }
+
+    @GetMapping("/getId")
+    public WebResult getCollectionId(@RequestParam Integer userId,@RequestParam Integer testId) {
+        return WebResult.ok().data(questionMapper.getCollectionId(userId,testId));
+    }
 }

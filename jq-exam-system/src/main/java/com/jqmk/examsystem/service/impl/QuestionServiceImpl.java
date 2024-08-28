@@ -113,7 +113,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 //        Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
 //        TestPaper testPaper = testPaperService.getById(id);//分值
         String stem = questionMapper.selectStem(Integer.valueOf(questionId));
-        if (questionMapper.countWrongQuestion(stem)<1) {
+        if (questionMapper.countWrongQuestion(stem,userId)<1) {
             questionMapper.addWrongsInfo(questionId, StringsUtil.strToList(wrong),userId);
         }
 //        if (type==1) {//单选

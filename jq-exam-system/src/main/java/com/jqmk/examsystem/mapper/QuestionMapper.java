@@ -131,12 +131,35 @@ public interface QuestionMapper extends BaseMapper<Question> {
     @Select("select id,stem,options,correct_options,type,analysis from question where status = 1 order by update_time desc limit #{page},#{pageSize}")
     List<ExamQuestion> viewDelQuestion(Long page, Long pageSize);
 
-    @Select("SELECT count(*) from user_error_records WHERE stem=#{stem}")
-    Integer countWrongQuestion(String stem);
+    @Select("SELECT count(*) from user_error_records WHERE stem=#{stem} and user_id = #{userId}")
+    Integer countWrongQuestion(String stem,Integer userId);
 
     @Select("select stem from question where id =#{questionId}")
     String selectStem(Integer questionId);
 
     @Select("select count(*) from question_collection where stem=#{stem} and user_id=#{userId}")
     Integer countCollectionQuestion(String stem, Integer userId);
+
+    @Update("UPDATE `question` SET `question_bank_id` = 0 WHERE question_bank_id = #{questionBankId}")
+    void delQuestion(Integer questionBankId);
+
+    @Update("UPDATE `question` SET `question_bank_id` = 0 WHERE id = #{id}")
+    void delQuestionInBank(Integer id);
+
+    @Results({
+            @Result(property = "options", column = "options", typeHandler = JsonTypeHandler.class),
+            @Result(property = "correctOptions", column = "correct_options", typeHandler = JsonTypeHandler.class)
+    })
+    @Select("select id,stem,type,options,correct_options,analysis from question where id =#{id} ")
+    ExamQuestion selectQuestionOne(Integer id);
+
+    @Insert("INSERT INTO question " +
+            "(`stem`, options, correct_options, analysis, type,question_bank_id) " +
+            "SELECT `stem`, options, correct_options, analysis, type,#{questionBankId} as question_bank_id " +
+            "FROM `question` where id=#{id}")
+    void saveQuestion(Integer questionBankId, Integer id);
+
+    @Select("SELECT qc.question_id FROM `question_collection` as qc,question_bank as qb,test_paper as t where qc.user_id=#{userId} " +
+            "and qc.question_bank_name =qb.bank_name and t.id=#{testId} and t.question_bank_id=qb.id")
+    List<Integer> getCollectionId(Integer userId, Integer testId);
 }

@@ -7,7 +7,9 @@ import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.jqmk.examsystem.dto.ExamCategoryDto;
+import com.jqmk.examsystem.dto.ExamQuestion;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
@@ -76,6 +78,7 @@ public class QuestionBankController {
     @DeleteMapping("/deleteBankName")
     public WebResult deleteBankName(@RequestBody QuestionBank questionBank) {
         questionBankService.removeById(questionBank);
+        questionMapper.delQuestion(Math.toIntExact(questionBank.getId()));
         return WebResult.ok().message("删除成功");
     }
 
@@ -95,11 +98,22 @@ public class QuestionBankController {
         String stem = questionInfo.getStem();
         JSONObject options = questionInfo.getOptions();
         Integer questionBankId = questionInfo.getQuestionBankId();
-
         if (questionMapper.countByStemAndOptions(stem, options.toJSONString(),questionBankId) > 0) {
             return WebResult.fail().message("重复添加");
         }
         questionService.save(questionInfo);
+        return WebResult.ok().message("添加成功");
+    }
+    @GetMapping("/addQuestionToBank")
+    public WebResult addQuestionToBank(@RequestParam Integer questionBankId, @RequestParam Integer id) {
+        ExamQuestion questionInfo = questionMapper.selectQuestionOne(id);
+        //检查题目是否已经存在
+        String stem = questionInfo.getStem();
+        JsonNode options = questionInfo.getOptions();
+        if (questionMapper.countByStemAndOptions(stem, String.valueOf(options),questionBankId) > 0) {
+            return WebResult.fail().message("重复添加");
+        }
+        questionMapper.saveQuestion(questionBankId,id);
         return WebResult.ok().message("添加成功");
     }
 
@@ -134,9 +148,16 @@ public class QuestionBankController {
         Page records = questionService.selectBankByPage(questionBankId,page,pageSize);
         return WebResult.ok().data(records);
     }
+    
     @GetMapping("/selectBankName")
     public WebResult selectBankName(){
         List<Map<String, Object>> questionBankList =  questionBankService.listMaps(new QueryWrapper<QuestionBank>().lambda().select());
         return WebResult.ok().data(questionBankList);
+    }
+
+    @GetMapping("/delQuestion")
+    public WebResult delQuestion(@RequestParam Integer id){
+        questionMapper.delQuestionInBank(id);
+        return WebResult.ok().message("删除成功");
     }
 }

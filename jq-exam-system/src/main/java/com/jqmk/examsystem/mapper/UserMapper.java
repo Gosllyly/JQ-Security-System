@@ -43,7 +43,7 @@ public interface UserMapper extends BaseMapper<User> {
             "employee_id = #{employeeId}," +
             "img_file = #{imgFile}," +
             "create_date = #{createDate} " +
-            "where id_card = #{idCard}")
+            "where id_card = #{idCard} and username =#{username}")
     void updateUser(String username, String deptName, String idCard, Integer cardNo, String employeeId, String jobType,String imgFile, LocalDateTime createDate);
 
     @Insert("INSERT INTO user (username,dept_name,id_card,card_no,employee_id,job_type,img_file,create_date) " +
@@ -58,8 +58,8 @@ public interface UserMapper extends BaseMapper<User> {
             "#{user.createDate}) ")
     void insertUser(@Param("user") User user);
 
-    @Select("select * from user where id_card = #{idCard} and username =#{username} order by create_date desc limit 0,1 ")
-    User selectByCardNoAndName(String idCard, String username);
+    @Select("select count(*) from user where id_card = #{idCard} and username =#{username} order by create_date desc limit 0,1 ")
+    Integer selectByCardNoAndName(String idCard, String username);
 
     @Update("<script>" +
             "UPDATE user " +

@@ -98,12 +98,12 @@ public class TimedTask {
                         .imgFile(image)
                         .createDate(person.getUpdatedTime())
                         .build();
-                User old = userMapper.selectByCardNoAndName(user.getIdCard(), user.getUsername());
-                log.info(old.getUsername()+old.getEmployeeId());
+                Integer old = userMapper.selectByCardNoAndName(user.getIdCard(), user.getUsername());
+                //log.info(old.getUsername()+old.getEmployeeId());
                 // 新增或者更新
-                if (old == null) {
+                if (old == 0) {
                     userMapper.insertUser(user);
-                } else if (!old.equals(user)) {
+                } else if (old == 1) {
                     userMapper.updateUser(user.getUsername(), user.getDeptName(), user.getIdCard(), user.getCardNo(), user.getEmployeeId(), user.getJobType(),user.getImgFile(), user.getCreateDate());
                 }
             }

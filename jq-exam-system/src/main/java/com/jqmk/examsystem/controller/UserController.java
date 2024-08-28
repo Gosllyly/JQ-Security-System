@@ -1,12 +1,14 @@
 package com.jqmk.examsystem.controller;
 
 
+import com.jqmk.examsystem.component.TimedTask;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.service.UserService;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.net.URISyntaxException;
 import java.util.Map;
 
 /**
@@ -22,6 +24,9 @@ import java.util.Map;
 public class UserController {
     @Resource
     private UserService userService;
+
+    @Resource
+    private TimedTask timedTask;
 
     /**
      * 用户登录验证
@@ -66,4 +71,17 @@ public class UserController {
     public WebResult getUserSelf(@RequestParam Long id) {
         return WebResult.ok().data(userService.getById(id));
     }
+
+    @GetMapping("/sync")
+    public WebResult sync() throws URISyntaxException {
+        timedTask.syncEmployeeInfoMas();
+        return WebResult.ok();
+    }
+
+    @GetMapping("/score")
+    public WebResult score()  {
+        timedTask.CalculateScore();
+        return WebResult.ok();
+    }
+
 }
