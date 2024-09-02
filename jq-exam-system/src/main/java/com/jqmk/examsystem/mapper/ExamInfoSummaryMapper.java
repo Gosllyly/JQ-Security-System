@@ -202,7 +202,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("select test_paper_id from exam_info_summary order by update_time desc limit 0,1")
     Integer selectTestId();
 
-    @Select("SELECT sum(es.exam_results!=1) as nopass,sum(es.exam_results=1) as pass,user.dept_name as deptName from exam_info_summary as es,test_paper as t,`user` " +
+    @Select("SELECT CONCAT(convert(sum(es.exam_results!=1)*100/count(es.exam_results),decimal(10,2)),'') as nopass,CONCAT(convert(sum(es.exam_results=1)*100/count(es.exam_results),decimal(10,2)),'') as pass,user.dept_name as deptName from exam_info_summary as es,test_paper as t,`user` " +
             "WHERE es.test_paper_id=t.id and t.id=#{testId} and (#{time} IS NULL OR DATE(es.end_time) = #{time}) and user.id=es.user_id group by user.dept_name ORDER BY pass desc limit 0,#{size}")
     List<Map<String, Object>> selectExamHistogram(String time, Integer testId, Integer size);
 
@@ -221,7 +221,11 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("SELECT COUNT(*) from exam_info_summary where exam_results=1")
     Double selectPassNum();
 
-    @Select("select COUNT(*) as num,user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id and es.exam_results=2 group by user.dept_name having count(*) >=1")
+    @Select("SELECT DISTINCT dept_name as deptName, IFNULL( tb.num, 0) num " +
+            "FROM user " +
+            "LEFT JOIN (" +
+            "select sum(es.exam_results=2) as num,user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id group by user.dept_name ) AS tb " +
+            "ON user.dept_name = tb.deptName ORDER BY num desc")
     List<Map<String, Object>> annularPie();
 
     @Select("SELECT count(es.user_id) as total,user.username,user.dept_name as deptName FROM exam_info_summary as es,user " +
@@ -231,8 +235,27 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("select id,name from test_paper order by update_time desc")
     List<Map<String, Object>> getTestId();
 
-    @Select("SELECT MONTH(es.end_time) as month,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.id),decimal(10,0)),'') as percentage " +
-            "FROM exam_info_summary as es GROUP BY MONTH(es.end_time) ORDER BY MONTH(es.end_time) ")
+    @Select("SELECT " +
+            "IFNULL(bbb.percentage, 0) as percentage,aaa.date " +
+            "FROM( " +
+            "select date from " +
+            "( " +
+            "SELECT CONCAT('1月') AS date UNION " +
+            "SELECT CONCAT('2月') AS date UNION " +
+            "SELECT CONCAT('3月') AS date UNION " +
+            "SELECT CONCAT('4月') AS date UNION " +
+            "SELECT CONCAT('5月') AS date UNION " +
+            "SELECT CONCAT('6月') AS date UNION " +
+            "SELECT CONCAT('7月') AS date UNION " +
+            "SELECT CONCAT('8月') AS date UNION " +
+            "SELECT CONCAT('9月') AS date UNION " +
+            "SELECT CONCAT('10月') AS date UNION " +
+            "SELECT CONCAT('11月') AS date UNION " +
+            "SELECT CONCAT('12月') AS date) as a " +
+            ")aaa " +
+            "LEFT JOIN( " +
+            "SELECT MONTH(es.end_time) as date,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.id),decimal(10,2)),'') as percentage " +
+            "FROM exam_info_summary as es GROUP BY MONTH(es.end_time) ORDER BY date ) bbb on bbb.date = aaa.date")
     List<Map<String, Object>> passRate();
 
     @Select("SELECT SUM(es.exam_results!=1) as num,user.username,user.dept_name as deptName FROM exam_info_summary as es,user " +

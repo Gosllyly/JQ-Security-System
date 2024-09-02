@@ -44,6 +44,7 @@ public class TimedTask {
     private UserProfileMapper userProfileMapper;
 
 
+
     //@Scheduled(cron = "0 0 13 * * ?")
     public void syncEmployeeInfoMas() throws URISyntaxException {
         String loginAddress = masInteractiveConfig.getServiceAddress() + masInteractiveConfig.getLoginUrl();
@@ -121,12 +122,26 @@ public class TimedTask {
             String name = resultSort.getUsername();
             String employeeId = resultSort.getEmployeeId();
             Integer violationNumber = userProfileMapper.count(name,employeeId);//计算最近7天的下井违章次数
-            userProfileMapper.deductPoints(resultSort.getId(),violationNumber);
+            if (violationNumber!=null) {
+                userProfileMapper.deductPoints(resultSort.getId(),violationNumber*2);
+            }
             Integer noWear = jqSecurityCheckMapper.noWearCount(name);//统计未穿戴次数
-            userProfileMapper.deductPoints(resultSort.getId(),noWear);
+            if (noWear!=null) {
+                userProfileMapper.deductPoints(resultSort.getId(),noWear/2);
+            }
             Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name);
-            userProfileMapper.deductPoints(resultSort.getId(),wrongWear);//统计穿戴不规范次数
+            if (wrongWear!=null) {
+                userProfileMapper.deductPoints(resultSort.getId(),wrongWear/3);//统计穿戴不规范次数
+            }
         }
         log.info("已打分");
+    }
+    //@Scheduled(cron = "0 30 6 * * ?")
+    public void RankingProcessing () {
+        log.info("开始处理");
+        userProfileMapper.delTable();
+        log.info("删除完毕");
+        userProfileMapper.insertData();
+        log.info("插入完毕");
     }
 }

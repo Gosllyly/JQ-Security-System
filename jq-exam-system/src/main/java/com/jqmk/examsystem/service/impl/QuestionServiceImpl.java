@@ -58,8 +58,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public Page queryQuestionPage(String stem, Integer type, Long page, Long pageSize) {
         Page<Question> questionPage = new Page<>(page,pageSize);
         questionPage.addOrder(new OrderItem("update_time",false));
-        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().like(stem!=null,"stem",stem)
-                .eq( "status",0).eq(type!=null,"type",type)).getRecords());
+        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().select("distinct stem,id,options,correct_options,analysis,type,question_bank_id,status").like(stem!=null,"stem",stem)
+                .eq( "status",0).eq(type!=null,"type",type).groupBy("stem","type")).getRecords());
         return records;
     }
 
@@ -91,7 +91,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public Page selectBaseBankByPage(Long page, Long pageSize) {
         Page<Question> questionPage = new Page<>(page,pageSize);
         questionPage.addOrder(new OrderItem("update_time",false));
-        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("status",0)).getRecords());
+        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().select("distinct stem,id,options,correct_options,analysis,type,question_bank_id,status").eq("status",0).groupBy("stem","type")).getRecords());
         return records;
     }
 

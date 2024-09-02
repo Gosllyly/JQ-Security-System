@@ -6,6 +6,8 @@ import com.jqmk.examsystem.dto.userProfile.UserProfileDetailDto;
 import com.jqmk.examsystem.dto.userProfile.UserProfileInfoDto;
 import com.jqmk.examsystem.entity.PenaltyData;
 import com.jqmk.examsystem.entity.UserProfileInfo;
+import org.apache.ibatis.annotations.Delete;
+import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -27,12 +29,12 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("select img_file from user where username = #{username} and employee_id = #{employeeId} order by create_date desc limit 0,1")
     String selectImage(String username, String employeeId);
 
-    @Select("SELECT DISTINCT(up.username),user.employee_id,user.img_file FROM `user_profile_data` as up,`user` " +
-            "where up.`level`='高风险' and up.username=user.username and to_days(up.creat_time) = to_days(now())")
+    @Select("SELECT * FROM (SELECT `rank`,username, employee_id,level FROM ( SELECT username, score,employee_id,level,creat_time, " +
+            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank`  FROM user_profile_data_dispose where `level`='高风险' ) AS ranked_table ) as a")
     List<UserProfileInfoDto> selectHighPeoples();
 
-    @Select("SELECT DISTINCT(up.username),user.employee_id,user.img_file FROM `user_profile_data` as up,`user` " +
-            "where up.`level`='中风险' and up.username=user.username and to_days(up.creat_time) = to_days(now())")
+    @Select("SELECT * FROM (SELECT `rank`,username, employee_id,level FROM ( SELECT username, score,employee_id,level,creat_time, " +
+            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank`  FROM user_profile_data_dispose where `level`='中风险' ) AS ranked_table ) as a")
     List<UserProfileInfoDto> selectMediumPeoples();
 
     @Select("SELECT DISTINCT(up.username),user.employee_id,user.img_file FROM `user_profile_data` as up,`user` " +
@@ -53,8 +55,8 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT DISTINCT(up.username),user.employee_id,user.img_file FROM `user_profile_data` as up,`user` " +
             "where up.`level`='低风险' and up.username=user.username and to_days(up.creat_time) = to_days(now()) limit #{page},#{pageSize}")
     List<UserProfileInfoDto> selectLowPeoples(Integer page, Integer pageSize);
-    @Select("SELECT DISTINCT(up.username),user.employee_id,user.img_file FROM `user_profile_data` as up,`user` " +
-            "where up.`level`='低风险' and up.username=user.username and to_days(up.creat_time) = to_days(now()) ")
+    @Select("SELECT * FROM (SELECT `rank`,username, employee_id,level FROM (SELECT username, score,employee_id,level,creat_time," +
+            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank`  FROM user_profile_data_dispose where `level`='低风险' ) AS ranked_table WHERE  `level`='低风险' ) as a")
     List<UserProfileInfoDto> selectLowPeople();
     @Select("SELECT COUNT(DISTINCT up.username) FROM `user_profile_data` as up,`user` " +
             "where up.`level`='低风险' and up.username=user.username and to_days(up.creat_time) = to_days(now())")
@@ -84,7 +86,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT COUNT(*) FROM `penalty_data` WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(violation_date) and duty_person=#{name} ")
     Integer count(String name, String employeeId);
 
-    @Select("select violation_date, violation_facts,penalty_amount from penalty_data where duty_person=#{name} order by violation_date desc limit 4")
+    @Select("select violation_date, violation_facts,penalty_amount from penalty_data where duty_person=#{name} and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(violation_date) order by violation_date desc limit 4")
     List<PenaltyData> selectViolationData(String name);
 
     @Select("select count(*) from user_profile_data where to_days(creat_time) = to_days(now())")
@@ -99,12 +101,12 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT `rank`" +
             "FROM (" +
             "    SELECT username, score,level,creat_time, ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
-            "    FROM user_profile_data where to_days(creat_time) = to_days(now()) " +
+            "    FROM user_profile_data_dispose where `level`=#{level} " +
             ") AS ranked_table " +
-            "WHERE username = #{name} and `level`=#{level} and to_days(creat_time) = to_days(now()) order by creat_time desc limit 0,1")
+            "WHERE username = #{name} and `level`=#{level} order by creat_time desc limit 0,1")
     Integer viewResultSort(String name, String employeeId,String level);
 
-    @Select("select count(*) from user_profile_data WHERE `level`=#{level} and to_days(creat_time) = to_days(now()) ")
+    @Select("select count(*) from user_profile_data_dispose WHERE `level`=#{level}  ")
     Integer viewResultAll(String level);
 
     @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low FROM `user_profile_data` WHERE DATE(creat_time) = CURDATE()")
@@ -116,16 +118,43 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low FROM `user_profile_data` WHERE DATE(creat_time) = #{time}")
     Map<String, Object> riskPieOtherDay(String time);
 
-    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
-            "WHERE date(creat_time)>=#{startTime} GROUP BY DATE(creat_time) ORDER BY date ")
+    @Select("SELECT " +
+            "IFNULL(bbb.percent, 0) as percent,aaa.date " +
+            "FROM( " +
+            "SELECT " +
+            " @cdate := date_add( @cdate, INTERVAL - 1 DAY )as date " +
+            "FROM " +
+            "( SELECT@cdate := date_add( CURDATE(), INTERVAL 1 DAY ) FROM user_profile_data LIMIT 7) a " +
+            ") aaa " +
+            "LEFT JOIN( " +
+            "SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "where date(creat_time)>=#{startTime} GROUP BY DATE(creat_time) ORDER BY date) bbb on bbb.date = aaa.date")
     List<Map<String, Object>> riskPercentage(String startTime);
 
-    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
-            "WHERE date(creat_time)>=#{startTime} GROUP BY WEEK(DATE(creat_time)) ORDER BY date ")
+    @Select("SELECT " +
+            "IFNULL(bbb.percent, 0) as percent,aaa.date " +
+            "FROM( " +
+            "SELECT " +
+            " @cdate := date_add( @cdate, INTERVAL - 1 DAY )as date " +
+            "FROM " +
+            "( SELECT@cdate := date_add( CURDATE(), INTERVAL 1 DAY ) FROM user_profile_data  LIMIT 31) a " +
+            ") aaa " +
+            "LEFT JOIN( " +
+            "SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "where date(creat_time)>=#{startTime} GROUP BY DATE(creat_time) ORDER BY date) bbb on bbb.date = aaa.date")
     List<Map<String, Object>> riskPercentageByWeek(String startTime);
 
-    @Select("SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
-            "WHERE date(creat_time)>=#{startTime} GROUP BY MONTH(DATE(creat_time)) ORDER BY date ")
+    @Select("SELECT " +
+            "IFNULL(bbb.percent, 0) as percent,aaa.date " +
+            "FROM( " +
+            "SELECT " +
+            " @cdate := date_add( @cdate, INTERVAL - 1 WEEK )as date " +
+            "FROM " +
+            "( SELECT@cdate := date_add( CURDATE(), INTERVAL 1 WEEK ) FROM user_profile_data LIMIT 14) a " +
+            ") aaa " +
+            "LEFT JOIN( " +
+            "SELECT CONCAT(convert(sum(`level`!='低风险')*100/count(*),decimal(10,2)),'') as percent,DATE(creat_time) as date FROM `user_profile_data` " +
+            "where date(creat_time)>=#{startTime} GROUP BY DATE(creat_time) ORDER BY date) bbb on bbb.date = aaa.date")
     List<Map<String, Object>> riskPercentageByMonth(String startTime);
 
     @Select("SELECT sum(`level`='高风险') as high ,sum(`level`='中风险') as medium,sum(`level`='低风险') as low ,`user`.dept_name as deptName " +
@@ -138,7 +167,25 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
             "and up.username=p.duty_person and (#{time} IS NULL OR p.violation_date=#{time}) and (#{deptName} IS NULL OR p.duty_unit = #{deptName}) GROUP BY p.duty_person,user.username ")
     List<Map<String, Object>> violationData(String time,String deptName);
 
-    @Select("SELECT distinct  username,employee_id,level FROM `user_profile_data` where to_days(creat_time) = to_days(now()) and username in (${names}) " +
-            "and level!='null' and level=#{type}")
+
+    @Select("SELECT * FROM (SELECT `rank`,username, employee_id,level FROM ( SELECT username, score,employee_id,level,creat_time, " +
+            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` FROM user_profile_data_dispose where  username in (${names}) and level!='null' and level=#{type} ) AS ranked_table ) as a")
     List<UserProfileInfoDto> selectByName(String names,String type);
+
+    @Select("SELECT any_value(username) as username,any_value(`level`) as level,any_value(employee_id) as employeeId,any_value(creat_time) " +
+            "FROM `user_profile_data` where level!='null' GROUP BY username ORDER BY any_value(creat_time) desc")
+    List<UserProfileInfoDto> selectAllPeople();
+
+    @Select("SELECT any_value(username) as username,any_value(`level`) as level,any_value(employee_id) as employeeId,any_value(creat_time) FROM `user_profile_data` where username in (${names}) and level!='null' GROUP BY username ORDER BY any_value(creat_time) desc ")
+    List<UserProfileInfoDto> selectByNameAll(String names);
+
+    @Delete("truncate table user_profile_data_dispose")
+    void delTable();
+
+    @Insert("INSERT INTO user_profile_data_dispose(id,employee_id,username,time,level,reason,creat_time,score) SELECT id, " +
+            "employee_id,username,time,level,reason,creat_time,score FROM (SELECT id, " +
+            "employee_id,username,time,level,reason,creat_time,score, " +
+            "ROW_NUMBER() OVER(PARTITION BY username ORDER BY creat_time DESC) AS rn " +
+            "FROM user_profile_data) as Rankedstudents WHERE Rankedstudents.rn=1;")
+    void insertData();
 }

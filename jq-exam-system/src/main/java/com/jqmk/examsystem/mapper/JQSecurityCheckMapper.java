@@ -23,7 +23,7 @@ public interface JQSecurityCheckMapper {
     String selectImage(String username, String employeeId);
 
     @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history` " +
-            "where  personName=#{name} and employeeId=#{employeeId} order by detectTime desc limit 7")
+            "where  personName=#{name}  order by detectTime desc limit 7")
     List<UserBehavior> queryBehavior(String employeeId, String name);
 
     @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history` " +
@@ -33,13 +33,20 @@ public interface JQSecurityCheckMapper {
     @Select("SELECT date_format(detectTime,'%Y-%m-%d'),employeeId FROM `employee_clock_history` WHERE personName = #{name} ORDER BY detectTime desc LIMIT 6,1")
     String selectData(String name, String employeeId);
 
-    @Select("SELECT sum(helmetStatus=2) as helmetNum,sum(helmetStatus=2) as helmetNum,sum(towelStatus=2) as towelNum,sum(shoesStatus=2) as shoesNum,sum(capLampStatus=2) as capNum,sum(rescuerStatus=2) as rescurNum " +
-            "FROM `employee_clock_history` WHERE personName = #{name} order by detectTime desc limit 0,7 ")
+    @Select("SELECT sum(towelStatus=2) as towelNum,sum(helmetStatus=2) as helmetNum,sum(capLampStatus=2) as capNum," +
+            "sum(rescuerStatus=2) as rescurNum,sum(shoesStatus=2) as shoesNum FROM (SELECT towelStatus,helmetStatus,capLampStatus,rescuerStatus,shoesStatus " +
+            "from employee_clock_history WHERE personName = #{name} order by detectTime desc limit 0,7 ) as a")
     List<Map<String, Object>> selectWearCount(String name, String employeeId);
 
-    @Select("select count(*) from `employee_clock_history` WHERE personName = #{name} and (helmetStatus=2 or capLampStatus=2 or shoesStatus=2 or towelStatus=2 or rescuerStatus=2) order by detectTime desc limit 0,7 ")
+    @Select("SELECT SUM(towelNum+helmetNum+capNum+rescurNum+shoesNum) FROM ( SELECT sum(towelStatus=2) as towelNum," +
+            "sum(helmetStatus=2) as helmetNum,sum(capLampStatus=2) as capNum,sum(rescuerStatus=2) as rescurNum,sum(shoesStatus=2) as shoesNum " +
+            "FROM (SELECT towelStatus,helmetStatus,capLampStatus,rescuerStatus,shoesStatus from employee_clock_history " +
+            "WHERE personName = #{name} order by detectTime desc limit 0,7 ) as a) as b")
     Integer wrongWearCount(String name);
 
-    @Select("select count(*) from `employee_clock_history` WHERE personName = #{name} and (helmetStatus=0 or capLampStatus=0 or shoesStatus=0 or towelStatus=0 or rescuerStatus=0) order by detectTime desc limit 0,7 ")
+    @Select("SELECT SUM(towelNum+helmetNum+capNum+rescurNum+shoesNum) FROM ( SELECT sum(towelStatus=0) as towelNum," +
+            "sum(helmetStatus=0) as helmetNum,sum(capLampStatus=0) as capNum,sum(rescuerStatus=0) as rescurNum,sum(shoesStatus=0) as shoesNum " +
+            "FROM (SELECT towelStatus,helmetStatus,capLampStatus,rescuerStatus,shoesStatus from employee_clock_history " +
+            "WHERE personName = #{name} order by detectTime desc limit 0,7 ) as a) as b")
     Integer noWearCount(String name);
 }

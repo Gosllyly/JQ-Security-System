@@ -118,11 +118,11 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
 
     @Override
     public List<Map<String, Object>> riskPercentage(String startTime, Integer type) {
-        if (type==1) {
+        if (type==1) {//7
             return userProfileMapper.riskPercentage(startTime);
-        }else if (type==2) {
+        }else if (type==2) {//31
             return userProfileMapper.riskPercentageByWeek(startTime);
-        }else if (type==3) {
+        }else if (type==3) {//30*3
             return userProfileMapper.riskPercentageByMonth(startTime);
         }else {
             return userProfileMapper.riskPercentageByMonth(startTime);
