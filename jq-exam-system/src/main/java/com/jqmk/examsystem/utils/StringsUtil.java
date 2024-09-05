@@ -136,6 +136,16 @@ public class StringsUtil {
             return null;
         }
     }
+    public static String stringRecomByAn (String str) {
+        if (str!=null) {
+            String newStr = str.replace("[", "");
+            String newStr1 = newStr.replace("]", "");
+            String newStr2 = newStr1.replace(", ", ",");
+            return newStr2;
+        }else {
+            return null;
+        }
+    }
     public static String stringRecomNew (String str) {
         if (str!=null) {
             String newStr = str.replace("[", "");

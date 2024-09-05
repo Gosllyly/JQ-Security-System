@@ -23,7 +23,7 @@ import java.util.Map;
 @Mapper
 public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
 
-    @Select("SELECT username FROM user WHERE (#{deptNames} IS NULL OR `dept_name` RLIKE #{deptNames})")
+    @Select("SELECT user.username FROM user,user_profile_data_dispose as up WHERE `dept_name` RLIKE #{deptNames} and user.username=up.username")
     List<String> selectByCondition(String deptNames);
 
     @Select("select img_file from user where username = #{username} and employee_id = #{employeeId} order by create_date desc limit 0,1")

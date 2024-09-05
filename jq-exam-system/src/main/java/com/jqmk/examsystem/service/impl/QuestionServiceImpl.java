@@ -99,6 +99,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public void addCurrent(Integer id,Integer testId, String questionId,Integer examSummary) {
         Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
         TestPaper testPaper = testPaperService.getById(id);//分值
+        questionMapper.addCurrent(testId);
         if (type==1) {//单选
             examInfoSummaryMapper.updateScore(testPaper.getSingleChoiceScore(),examSummary);
         }else if (type==2) {//多选
@@ -112,6 +113,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public void addWrongs(Integer id,Integer testId, String questionId,Integer examSummary,String wrong,Integer userId) {
 //        Integer type = questionMapper.selectType(Integer.valueOf(questionId));//题目类型
 //        TestPaper testPaper = testPaperService.getById(id);//分值
+        questionMapper.addWrongs(testId);
         String stem = questionMapper.selectStem(Integer.valueOf(questionId));
         if (questionMapper.countWrongQuestion(stem,userId)<1) {
             questionMapper.addWrongsInfo(questionId, StringsUtil.strToList(wrong),userId);

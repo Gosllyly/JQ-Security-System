@@ -132,6 +132,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
     @Override
     public Map<String, Object> selectByName(String name) {
         String names = String.valueOf(StringsUtil.strAdd(name));
+        System.out.println(names);
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         List<UserProfileInfoDto> lowPeople= userProfileMapper.selectByName(names,"低风险");
         result.put("low",lowPeople);

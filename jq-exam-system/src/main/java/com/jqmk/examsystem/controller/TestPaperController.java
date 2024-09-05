@@ -99,6 +99,10 @@ public class TestPaperController {
         //List<String> names = examCrowdManageService.listObjs(new QueryWrapper<ExamCrowdManage>().lambda().select(ExamCrowdManage::getIncludePeoples)
         //        .like(ExamCrowdManage::getId,testPaper.getId()), Object::toString);
         testPaper.setUpdateTime(LocalDateTime.now());
+        Integer bankId = testPaperMapper.selectOldId(testPaper.getId());
+        if (bankId!=testPaper.getQuestionBankId()) {
+            testPaperMapper.delTestPaperBank(testPaper.getId());
+        }
         //testPaper.setExamCrowdIds(StringsUtil.stringRecom(names.toString()));
         testPaperService.updateById(testPaper);
         return WebResult.ok().message("更新成功");

@@ -8,6 +8,7 @@ import com.jqmk.examsystem.mapper.UserProfileMapper;
 import com.jqmk.examsystem.service.UserProfileService;
 import lombok.extern.log4j.Log4j2;
 import net.sf.json.JSONObject;
+import org.apache.ibatis.annotations.Param;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;

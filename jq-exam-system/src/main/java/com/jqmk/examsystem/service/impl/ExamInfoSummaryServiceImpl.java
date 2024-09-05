@@ -244,7 +244,7 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         Integer amount = Math.toIntExact(examInfoSummaryMapper.selectCount(new QueryWrapper<>()));
         Integer people = examInfoSummaryMapper.countPeople();
         Double number = examInfoSummaryMapper.countNumber();
-        DecimalFormat df = new DecimalFormat("0.000");
+        DecimalFormat df = new DecimalFormat("0.00");
         Double passNum = examInfoSummaryMapper.selectPassNum();
         Map<String, Object> res = new HashMap();
         res.put("amount", amount);
@@ -291,22 +291,9 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         return newId;
     }
 
-    public void wrapTestPaper(Integer examSummary, Integer id) {//id是问卷规则的id
-        Integer examResults = examInfoSummaryMapper.equalsScore(examSummary);//判断是不是及格
-        if (examResults == 1) {//及格
-            Integer learningScore = testPaperMapper.selectLearningScore(id);
-            Integer learningTime = testPaperMapper.selectLearningTime(id);
-            examInfoSummaryMapper.updateTestPaper(examSummary, learningScore, learningTime, examResults);
-        } else if (examResults == 2) {//不及格
-            Integer learningScore = 0;
-            Integer learningTime = 0;
-            examInfoSummaryMapper.updateTestPaper(examSummary, learningScore, learningTime, examResults);
-        }
-    }
-
     @Override
     public Map<String, Object> correctingTestPaper(Integer id, Integer userId, List<String> userAnswer) {
-        Integer examSummary = insertNewRecord(userId, id, StringsUtil.stringRecom(userAnswer.toString()));//生成新的问卷方法，用于后续进行成绩录入
+        Integer examSummary = insertNewRecord(userId, id, StringsUtil.stringRecomByAn(userAnswer.toString()));//生成新的问卷方法，用于后续进行成绩录入
         questionMapper.insertRecord(id, examSummary, userId);//插入新的答题情况记录
         Integer testId = questionMapper.selectId(id, userId);//找到刚插入的id
         //通过传入，得到问题id
@@ -319,9 +306,11 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
             String daan = questionMapper.selectCurrent(Integer.valueOf(list1.get(i)));
             if (json.getString(list1.get(i)).equals("")) {
                 questionMapper.addNoReply(testId);
-            } else if (StringsUtil.stringRecom(daan).replaceAll("\"", "").equals(json.getString(list1.get(i)))) {
+            } else if (StringsUtil.stringRecom(daan).replaceAll("\"", "").replaceAll(",", ", ").equals(json.getString(list1.get(i)))) {
+                System.out.println("对了");
                 questionService.addCurrent(id, testId, list1.get(i), examSummary);
-            } else if (!StringsUtil.stringRecom(daan).replaceAll("\"", "").equals(json.getString(list1.get(i)))) {
+            } else if (!StringsUtil.stringRecom(daan).replaceAll("\"", "").replaceAll(",", ", ").equals(json.getString(list1.get(i)))) {
+                System.out.println("错了");
                 questionService.addWrongs(id, testId, list1.get(i), examSummary, json.getString(list1.get(i)), userId);
             }
         }
@@ -334,5 +323,18 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
         res.put("question", question);
         res.put("answer", examInfoSummaryList);
         return res;
+    }
+    public void wrapTestPaper(Integer examSummary, Integer id) {//id是问卷规则的id
+        System.out.println("判断是不是合格");
+        Integer examResults = examInfoSummaryMapper.equalsScore(examSummary);//判断是不是及格
+        if (examResults == 1) {//及格
+            Integer learningScore = testPaperMapper.selectLearningScore(id);
+            Integer learningTime = testPaperMapper.selectLearningTime(id);
+            examInfoSummaryMapper.updateTestPaper(examSummary, learningScore, learningTime, examResults);
+        } else if (examResults == 2) {//不及格
+            Integer learningScore = 0;
+            Integer learningTime = 0;
+            examInfoSummaryMapper.updateTestPaper(examSummary, learningScore, learningTime, examResults);
+        }
     }
 }

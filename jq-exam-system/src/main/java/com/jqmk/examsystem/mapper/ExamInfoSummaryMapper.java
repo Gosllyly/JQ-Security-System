@@ -123,7 +123,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
 
     @Select("SELECT " +
             "  CASE " +
-            "    WHEN exam_info_summary.score > test_paper.pass_score THEN '1' " +
+            "    WHEN exam_info_summary.score >= test_paper.pass_score THEN '1' " +
             "    ELSE '2' " +
             "  END AS result " +
             "FROM " +
@@ -172,7 +172,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     List<Map<String, Object>> riskHistogram();
 
 
-    @Select("SELECT MAX(es.score) as max,MIN(es.score) as min,AVG(es.score) as avg,COUNT(DISTINCT es.user_id) as joinNum,es.name,length(t.exam_crowd_ids)+1 - length(REPLACE(t.exam_crowd_ids,',','')) AS allNum,t.id as id " +
+    @Select("SELECT MAX(es.score) as max,MIN(es.score) as min,ROUND(AVG(es.score),0) as avg,COUNT(DISTINCT es.user_id) as joinNum,es.name,length(t.exam_crowd_ids)+1 - length(REPLACE(t.exam_crowd_ids,',','')) AS allNum,t.id as id " +
             "from exam_info_summary AS es,test_paper as t WHERE t.id=es.test_paper_id GROUP BY es.name")
     List<Map<String, Object>> scoreDetail();
 
@@ -194,7 +194,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("select exam_crowd_ids from test_paper where id = #{id}")
     List<String> selectAllExamPeople(Integer id);
 
-    @Select("SELECT es.`name`,user.dept_name as deptName,MAX(es.score) AS max,MIN(es.score) as min ,AVG(es.score) as avg " +
+    @Select("SELECT es.`name`,user.dept_name as deptName,MAX(es.score) AS max,MIN(es.score) as min,ROUND(AVG(es.score),0) as avg " +
             "FROM exam_info_summary as es,user where es.user_id=user.id and es.test_paper_id=#{id} and (#{time} IS NULL OR DATE(es.end_time) = #{time} ) " +
             "GROUP BY user.dept_name ORDER BY avg desc limit 0,#{size}")
     List<Map<String, Object>> selectExamPercentage(String time, Integer id,Integer size);
@@ -262,7 +262,7 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "WHERE es.user_id=user.id GROUP BY user.username ORDER BY num DESC limit 0,10")
     List<Map<String, Object>> noPassList();
 
-    @Select("SELECT user.username,user.dept_name as deptName, AVG(es.score) as avg,COUNT(es.id) as total FROM exam_info_summary as es,user " +
+    @Select("SELECT user.username,user.dept_name as deptName, ROUND(AVG(es.score),0) as avg,COUNT(es.id) as total FROM exam_info_summary as es,user " +
             "where es.user_id=user.id and DATE(es.end_time)>=#{starTime} AND DATE(es.end_time)<=#{endTime} GROUP BY user.username ORDER BY avg DESC limit 0,10")
     List<Map<String, Object>> scoreRate(String starTime, String endTime);
 

@@ -2,6 +2,7 @@ package com.jqmk.examsystem.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.jqmk.examsystem.entity.TestPaper;
+import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
 
@@ -30,4 +31,10 @@ public interface TestPaperMapper extends BaseMapper<TestPaper> {
 
     @Select("SELECT SUM(redo_num) FROM test_paper WHERE id = #{id}")
     Integer selectRedoNum(Integer id);
+
+    @Select("select question_bank_id from FROM test_paper WHERE id = #{id}")
+    Integer selectOldId(Long id);
+
+    @Delete("delete from FROM test_paper_question WHERE test_paper_id = #{id}")
+    void delTestPaperBank(Long id);
 }
