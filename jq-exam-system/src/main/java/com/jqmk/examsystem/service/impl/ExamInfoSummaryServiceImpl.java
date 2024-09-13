@@ -255,6 +255,21 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
     }
 
     @Override
+    public Map<String, Object> annularPie(String deptName, Integer size) {
+        if (deptName==null) {
+            Map<String, Object> res = new HashMap();
+            res.put("pie", examInfoSummaryMapper.annularPieNull(size));
+            res.put("name", examInfoSummaryMapper.annularNameNull(size));
+            return res;
+        }else {
+            Map<String, Object> res = new HashMap();
+            res.put("pie", examInfoSummaryMapper.annularPie(String.valueOf(StringsUtil.strAdd(deptName))));
+            res.put("name", Arrays.asList(deptName.split(",")));
+            return res;
+        }
+    }
+
+    @Override
     public Map<String, Object> learnTimeCondition(String deptName, String username, String name, Long page, Long pageSize) {
         List<ExamLearnTime> learnTimeCondition = examInfoSummaryMapper.learnTimeCondition(deptName, username, name, (page - 1) * pageSize, pageSize);
         Integer total = examInfoSummaryMapper.learnTimeConditionCount(deptName, username, name);

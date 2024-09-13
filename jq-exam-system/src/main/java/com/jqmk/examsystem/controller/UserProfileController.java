@@ -64,9 +64,14 @@ public class UserProfileController {
         return WebResult.ok().data(userProfileService.viewMain());
     }
 
+    @GetMapping("selectByTime")
+    public WebResult selectByTime(String time) {
+        return WebResult.ok().data(userProfileService.selectByTime(time));
+    }
+
     @PostMapping("select")
-    public WebResult selectByName(String name) {
-        return WebResult.ok().data(userProfileService.selectByName(name));
+    public WebResult selectByName(@RequestBody SelectPeoplesDto selectPeoplesDto) {
+        return WebResult.ok().data(userProfileService.selectByName(selectPeoplesDto.getName()));
     }
 
     @GetMapping("details")
@@ -77,6 +82,16 @@ public class UserProfileController {
     @GetMapping("violationData")
     public WebResult violationCount(String name,String employeeId) {
         return WebResult.ok().data(userProfileService.violationCount(name,employeeId));
+    }
+
+    @GetMapping("violationPeople")
+    public WebResult violationPeople(String type) {
+        return WebResult.ok().data(userProfileMapper.violationPeople(type));
+    }
+
+    @GetMapping("violationType")
+    public WebResult violationType() {
+        return WebResult.ok().data(userProfileMapper.violationType());
     }
 
     @GetMapping("tableData")

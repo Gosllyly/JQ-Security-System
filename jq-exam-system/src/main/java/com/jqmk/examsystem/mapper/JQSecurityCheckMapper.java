@@ -27,7 +27,7 @@ public interface JQSecurityCheckMapper {
     List<UserBehavior> queryBehavior(String employeeId, String name);
 
     @Select("SELECT detectTime,helmetStatus,towelStatus,rescuerStatus,shoesStatus,capLampStatus FROM `employee_clock_history` " +
-            "where  personName=#{name} order by detectTime desc limit 4")
+            "where  personName=#{name} order by detectTime desc limit 30")
     List<UserBehavior> wearDataNum(String name);
 
     @Select("SELECT date_format(detectTime,'%Y-%m-%d'),employeeId FROM `employee_clock_history` WHERE personName = #{name} ORDER BY detectTime desc LIMIT 6,1")

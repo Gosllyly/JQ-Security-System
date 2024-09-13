@@ -46,12 +46,19 @@ public class ExamCrowdManage implements Serializable {
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> includeJobType;
 
-    private String riskPeople;
-
     /**
      * 考试人的user列表
      */
     private String includePeoples;
+
+//    //筛选风险用户名单的时间
+//    private String time;
+//
+//    //筛选风险用户名单的等级
+//    private String risk;
+//
+//    //筛选井下违章作业类型的人员名单
+//    private String type;
 
     /**
      * 是否被删除，默认是0(未被删除)，1(已删除)

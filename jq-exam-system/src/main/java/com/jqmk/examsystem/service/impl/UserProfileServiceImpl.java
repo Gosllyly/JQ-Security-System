@@ -80,6 +80,19 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
     }
 
     @Override
+    public Map<String, Object> selectByTime(String time) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        List<String> lowPeople= userProfileMapper.selectLowPeopleByTime(time);
+        List<String> mediumPeoples= userProfileMapper.selectMediumPeoplesByTime(time);
+        List<String> intersection = (List<String>) CollectionUtils.subtract(mediumPeoples, lowPeople);
+        result.put("low",lowPeople);
+        result.put("medium",intersection);
+        List<String> highPeoples= userProfileMapper.selectHighPeoplesByTime(time);
+        result.put("high",highPeoples);
+        return result;
+    }
+
+    @Override
     public Map<String, Object> violationCount(String name, String employeeId) {
         //String data = jqSecurityCheckMapper.selectData(name,employeeId);
         List<Map<String, Object>> wearDataNum = jqSecurityCheckMapper.selectWearCount(name,employeeId);
@@ -271,7 +284,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
 
     public String convert(Integer status) {
         if (status == 0) {
-            return "未穿戴";
+            return "未检测";
         } else if (status == 1) {
             return "已穿戴";
         } else if (status == 2) {

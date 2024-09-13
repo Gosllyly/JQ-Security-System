@@ -5,12 +5,16 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.mapper.UserMapper;
+import com.jqmk.examsystem.mapper.UserProfileMapper;
+import com.jqmk.examsystem.service.UserProfileService;
 import com.jqmk.examsystem.service.UserService;
 import com.jqmk.examsystem.utils.JwtUtil;
 import com.jqmk.examsystem.utils.StringsUtil;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,6 +32,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private UserProfileMapper userProfileMapper;
+
+    @Resource
+    private UserProfileService userProfileService;
 
     @Override
     public Map<String, Object> login(String userName, String password) {
@@ -53,26 +63,43 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto) {
-        if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getRiskPeople()==null) {
+        if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getTime()==null) {
             String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
-            List<String> userList = userMapper.selectByConditionOR(deptNames,selectPeoplesDto.getName());
-            return userList;
-        }else if (selectPeoplesDto.getRiskPeople()==null&&selectPeoplesDto.getIncludeJobType()!=null){
+            List<String> userList1 = userMapper.selectByConditionOR(deptNames,selectPeoplesDto.getName());
+            if (selectPeoplesDto.getType()!=null) {
+                List<String> userList = (List<String>) CollectionUtils.intersection(userList1, userProfileMapper.violationPeople(selectPeoplesDto.getType()));
+                return userList;
+            }
+            return userList1;
+        }else if (selectPeoplesDto.getIncludeJobType()!=null&&selectPeoplesDto.getTime()==null){
             String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
             String jobTypes = StringsUtil.arrayToStr(selectPeoplesDto.getIncludeJobType().toString());
-            List<String> userList = userMapper.selectByCondition(deptNames,jobTypes,selectPeoplesDto.getName());
-            return userList;
-        }else if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getRiskPeople()!=null){
+            List<String> userList1 = userMapper.selectByCondition(deptNames,jobTypes,selectPeoplesDto.getName());
+            if (selectPeoplesDto.getType()!=null) {
+                List<String> userList = (List<String>) CollectionUtils.intersection(userList1, userProfileMapper.violationPeople(selectPeoplesDto.getType()));
+                return userList;
+            }
+            return userList1;
+        }else if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getTime()!=null){
             String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
-            ///String riskPeople = StringsUtil.arrayToStr(selectPeoplesDto.getRiskPeople().toString());
-            List<String> userList = userMapper.selectByConditionOther(deptNames,selectPeoplesDto.getName(),selectPeoplesDto.getRiskPeople());
-            return userList;
+            List<String> userList1 = userMapper.selectByConditionOther(deptNames,selectPeoplesDto.getName());
+            List<String> userList2 = (List<String>) CollectionUtils.intersection(userList1, (Collection) userProfileService.selectByTime(selectPeoplesDto.getTime()).get(selectPeoplesDto.getRisk()));
+            if (selectPeoplesDto.getType()!=null) {
+                List<String> userList = (List<String>) CollectionUtils.intersection(userList2, userProfileMapper.violationPeople(selectPeoplesDto.getType()));
+                return userList;
+            }
+            return userList2;
         }else {
             String jobTypes = StringsUtil.arrayToStr(selectPeoplesDto.getIncludeJobType().toString());
             String deptNames = StringsUtil.arrayToString1(selectPeoplesDto.getIncludeDeptCodes());
             //String riskPeople = StringsUtil.arrayToStr(selectPeoplesDto.getRiskPeople().toString());
-            List<String> userList = userMapper.selectByConditionAll(deptNames,jobTypes,selectPeoplesDto.getName(),selectPeoplesDto.getRiskPeople());
-            return userList;
+            List<String> userList1 = userMapper.selectByConditionAll(deptNames,jobTypes,selectPeoplesDto.getName());
+            List<String> userList2 = (List<String>) CollectionUtils.intersection(userList1,  (Collection) userProfileService.selectByTime(selectPeoplesDto.getTime()).get(selectPeoplesDto.getRisk()));
+            if (selectPeoplesDto.getType()!=null) {
+                List<String> userList = (List<String>) CollectionUtils.intersection(userList2, userProfileMapper.violationPeople(selectPeoplesDto.getType()));
+                return userList;
+            }
+            return userList2;
         }
     }
 

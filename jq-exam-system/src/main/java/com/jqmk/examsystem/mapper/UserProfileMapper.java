@@ -56,7 +56,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
             "where up.`level`='低风险' and up.username=user.username and to_days(up.creat_time) = to_days(now()) limit #{page},#{pageSize}")
     List<UserProfileInfoDto> selectLowPeoples(Integer page, Integer pageSize);
     @Select("SELECT * FROM (SELECT `rank`,username, employee_id,level FROM (SELECT username, score,employee_id,level,creat_time," +
-            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank`  FROM user_profile_data_dispose where `level`='低风险' ) AS ranked_table WHERE  `level`='低风险' ) as a")
+            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` FROM user_profile_data_dispose where `level`='低风险' ) AS ranked_table WHERE  `level`='低风险' ) as a")
     List<UserProfileInfoDto> selectLowPeople();
     @Select("SELECT COUNT(DISTINCT up.username) FROM `user_profile_data` as up,`user` " +
             "where up.`level`='低风险' and up.username=user.username and to_days(up.creat_time) = to_days(now())")
@@ -162,7 +162,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
             "GROUP BY user.dept_name ORDER BY low desc LIMIT 10")
     List<Map<String, Object>> riskHistogram(String time);
 
-    @Select("SELECT p.duty_person as dutyPerson,p.duty_unit as dutyUnit,count(p.duty_person) as number,up.`level`,SUM(p.penalty_amount) as money,user.employee_id as employeeId " +
+    @Select("SELECT p.duty_person as dutyPerson,p.duty_unit as dutyUnit,p.violation_type as type,up.`level`,p.penalty_amount as money,user.employee_id as employeeId " +
             "FROM penalty_data as p,user,user_profile_data as up where p.duty_person=user.username and p.duty_unit=user.dept_name " +
             "and up.username=p.duty_person and (#{time} IS NULL OR p.violation_date=#{time}) and (#{deptName} IS NULL OR p.duty_unit = #{deptName}) GROUP BY p.duty_person,user.username ")
     List<Map<String, Object>> violationData(String time,String deptName);
@@ -188,4 +188,26 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
             "ROW_NUMBER() OVER(PARTITION BY username ORDER BY creat_time DESC) AS rn " +
             "FROM user_profile_data) as Rankedstudents WHERE Rankedstudents.rn=1;")
     void insertData();
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='低风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='低风险' ) as a")
+    List<String> selectLowPeopleByTime(String time);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='中风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='中风险' ) as a")
+    List<String> selectMediumPeoplesByTime(String time);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='高风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='高风险' ) as a")
+    List<String> selectHighPeoplesByTime(String time);
+
+    @Select("SELECT violation_type as type,COUNT(id) as number FROM penalty_data WHERE violation_date=#{time} GROUP BY violation_type")
+    List<Map<String, Object>> violationPie(String time);
+
+    @Select("SELECT DISTINCT duty_person FROM `penalty_data` where violation_type=#{type} and DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date(creat_time)")
+    List<String> violationPeople(String type);
+
+
+    @Select("SELECT DISTINCT violation_type FROM `penalty_data` ")
+    List<String> violationType();
 }

@@ -25,13 +25,13 @@ public interface UserMapper extends BaseMapper<User> {
             "and (#{name} IS NULL OR username LIKE '${name}%')")
     List<String> selectByConditionOR(String deptNames,String name);
 
-    @Select("SELECT distinct user.username FROM user,user_profile_data_dispose as up WHERE (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
-            "and (#{name} IS NULL OR user.username LIKE '${name}%') and up.level = #{riskPeople} and to_days(up.creat_time) = to_days(now()) and user.username=up.username")
-    List<String> selectByConditionOther(String deptNames,String name,String riskPeople);
+    @Select("SELECT distinct user.username FROM user WHERE (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR user.username LIKE '${name}%') ")
+    List<String> selectByConditionOther(String deptNames,String name);
 
-    @Select("SELECT distinct user.username FROM user,user_profile_data_dispose as up WHERE user.job_type in (${jobTypes}) AND (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
-            "and (#{name} IS NULL OR user.username LIKE '${name}%') and up.level = #{riskPeople} and to_days(up.creat_time) = to_days(now()) and user.username=up.username")
-    List<String> selectByConditionAll(String deptNames,String jobTypes, String name,String riskPeople);
+    @Select("SELECT distinct user.username FROM user WHERE user.job_type in (${jobTypes}) AND (#{deptNames} IS NULL OR user.`dept_name` RLIKE #{deptNames}) " +
+            "and (#{name} IS NULL OR user.username LIKE '${name}%') ")
+    List<String> selectByConditionAll(String deptNames,String jobTypes, String name);
 
     @Update("UPDATE user " +
             "set " +

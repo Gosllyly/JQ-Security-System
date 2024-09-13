@@ -61,4 +61,6 @@ public interface ExamInfoSummaryService extends IService<ExamInfoSummary> {
     List<Map<String, Object>> examHistogram(String time, Integer id, Integer size);
 
     Map<String, Object> title();
+
+    Map<String, Object> annularPie(String deptName, Integer size);
 }

@@ -48,7 +48,7 @@ public class ExamCrowdManageController {
         ExamCrowdManage examCrowdManage = new ExamCrowdManage();
         examCrowdManage.setCrowdName(examCrowdManageDto.getCrowdName());
         examCrowdManage.setIncludeJobType(examCrowdManageDto.getIncludeJobType());
-        examCrowdManage.setRiskPeople(examCrowdManageDto.getRiskPeople());
+        //examCrowdManage.setRiskPeople(examCrowdManageDto.getRiskPeople());
         examCrowdManage.setIncludeDeptCodes(examCrowdManageDto.getIncludeDeptCodes());
         examCrowdManage.setIncludePeoples(StringsUtil.stringRecomNew(examCrowdManageDto.getIncludePeoples().toString()));
         if (examCrowdManageService.count(new QueryWrapper<ExamCrowdManage>().eq("crowd_name",examCrowdManage.getCrowdName()))==0) {
@@ -85,7 +85,7 @@ public class ExamCrowdManageController {
         examCrowdManage.setId(examCrowdManageDto.getId());
         examCrowdManage.setCrowdName(examCrowdManageDto.getCrowdName());
         examCrowdManage.setIncludeJobType(examCrowdManageDto.getIncludeJobType());
-        examCrowdManage.setRiskPeople(examCrowdManageDto.getRiskPeople());
+        //examCrowdManage.setRiskPeople(examCrowdManageDto.getRiskPeople());
         examCrowdManage.setIncludeDeptCodes(examCrowdManageDto.getIncludeDeptCodes());
         examCrowdManage.setIncludePeoples(StringsUtil.stringRecomNew(examCrowdManageDto.getIncludePeoples().toString()));
         if (examCrowdManageService.count(new QueryWrapper<ExamCrowdManage>().eq("crowd_name",examCrowdManage.getCrowdName()))<2) {

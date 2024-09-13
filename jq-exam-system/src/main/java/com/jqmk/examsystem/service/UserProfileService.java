@@ -46,4 +46,6 @@ public interface UserProfileService extends IService<UserProfileInfo> {
     List<Map<String, Object>> riskPercentage(String startTime, Integer type);
 
     Map<String, Object> selectByName(String name);
+
+    Map<String, Object> selectByTime(String time);
 }

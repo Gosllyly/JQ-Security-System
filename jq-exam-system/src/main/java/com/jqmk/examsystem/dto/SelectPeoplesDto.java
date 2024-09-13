@@ -37,7 +37,15 @@ public class SelectPeoplesDto {
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<String> includeJobType;
 
+    //筛选风险用户名单的时间
+    private String time;
+
+    //筛选风险用户名单的等级
+    private String risk;
+
+    //筛选姓氏
     private String name;
 
-    private String riskPeople;
+    //筛选井下违章作业类型的人员名单
+    private String type;
 }

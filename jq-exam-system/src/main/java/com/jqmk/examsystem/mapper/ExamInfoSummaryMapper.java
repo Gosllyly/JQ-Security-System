@@ -206,10 +206,10 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
             "WHERE es.test_paper_id=t.id and t.id=#{testId} and (#{time} IS NULL OR DATE(es.end_time) = #{time}) and user.id=es.user_id group by user.dept_name ORDER BY pass desc limit 0,#{size}")
     List<Map<String, Object>> selectExamHistogram(String time, Integer testId, Integer size);
 
-    @Select("SELECT q.bank_name as bankName,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.exam_results),decimal(10,2)),'') as pass," +
+    @Select("SELECT  t.`name` as bankName,CONCAT(convert(SUM(es.exam_results=1)*100/count(es.exam_results),decimal(10,2)),'') as pass," +
             "CONCAT(convert(SUM(es.exam_results!=1)*100/count(es.exam_results),decimal(10,2)),'') as nopass " +
-            "from exam_info_summary as es,test_paper as t,question_bank as q " +
-            "where es.test_paper_id=t.id and t.question_bank_id=q.id and es.test_paper_id in (${ids}) GROUP BY q.bank_name ORDER BY pass desc limit 0,#{size}")
+            "from exam_info_summary as es,test_paper as t " +
+            "where es.test_paper_id=t.id and es.test_paper_id in (${ids}) GROUP BY t.`name` ORDER BY pass desc limit 0,#{size}")
     List<Map<String, Object>> scoreHistogram(Integer size,String ids);
 
     @Select("select COUNT(DISTINCT user_id) FROM exam_info_summary")
@@ -221,12 +221,9 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
     @Select("SELECT COUNT(*) from exam_info_summary where exam_results=1")
     Double selectPassNum();
 
-    @Select("SELECT DISTINCT dept_name as deptName, IFNULL( tb.num, 0) num " +
-            "FROM user " +
-            "LEFT JOIN (" +
-            "select sum(es.exam_results=2) as num,user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id group by user.dept_name ) AS tb " +
-            "ON user.dept_name = tb.deptName ORDER BY num desc")
-    List<Map<String, Object>> annularPie();
+    @Select("select sum(es.exam_results=2) as num,user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id and " +
+            "user.dept_name in (${deptName}) group by user.dept_name ")
+    List<Map<String, Object>> annularPie(String deptName);
 
     @Select("SELECT count(es.user_id) as total,user.username,user.dept_name as deptName FROM exam_info_summary as es,user " +
             "WHERE es.user_id=user.id and DATE(es.end_time)>=#{starTime} AND DATE(es.end_time)<=#{endTime} GROUP BY user.username ORDER BY total desc limit 0,10")
@@ -277,4 +274,12 @@ public interface ExamInfoSummaryMapper extends BaseMapper<ExamInfoSummary> {
 
     @Select("select test_paper_id as testId,name from exam_info_summary order by update_time desc limit 0,1")
     Map<String, Object> getTestName();
+
+    @Select("select sum(es.exam_results=2) as num,user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id " +
+            "group by user.dept_name limit 0,#{size}")
+    List<Map<String, Object>> annularPieNull(Integer size);
+
+    @Select("select user.dept_name as deptName from exam_info_summary as es,user where es.user_id=user.id " +
+            "group by user.dept_name limit 0,#{size}")
+    List<String> annularNameNull(Integer size);
 }

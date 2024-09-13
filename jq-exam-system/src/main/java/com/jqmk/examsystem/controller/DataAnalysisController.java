@@ -115,6 +115,10 @@ public class DataAnalysisController {
         return WebResult.ok().data(userProfileMapper.violationData(time,deptName));
     }
 
+    @GetMapping("/violationPie")
+    public WebResult violationPie(@RequestParam(required = false) String time) {
+        return WebResult.ok().data(userProfileMapper.violationPie(time));
+    }
     @GetMapping("/examPeoplePie")
     public WebResult examPeoplePie(@RequestParam Integer testId) {
         return WebResult.ok().data(examInfoSummaryService.examPeoplePie(testId));
@@ -141,8 +145,8 @@ public class DataAnalysisController {
     }
 
     @GetMapping("/annular")
-    public WebResult annularPie() {
-        return WebResult.ok().data(examInfoSummaryMapper.annularPie());
+    public WebResult annularPie(@RequestParam(required = false) String deptName,@RequestParam Integer size) {
+        return WebResult.ok().data(examInfoSummaryService.annularPie(deptName,size));
     }
 
     @GetMapping("/numRank")
@@ -169,6 +173,7 @@ public class DataAnalysisController {
     public WebResult scoreRate(@RequestParam(required = false) String starTime,@RequestParam(required = false) String endTime) {
         return WebResult.ok().data(examInfoSummaryMapper.scoreRate(starTime,endTime));
     }
+
     @GetMapping("/testName")
     public WebResult testName() {
         return WebResult.ok().data(examInfoSummaryMapper.getTestName());
