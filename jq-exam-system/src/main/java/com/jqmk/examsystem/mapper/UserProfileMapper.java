@@ -86,7 +86,7 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT COUNT(*) FROM `penalty_data` WHERE DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(violation_date) and duty_person=#{name} ")
     Integer count(String name, String employeeId);
 
-    @Select("select violation_date, violation_facts,penalty_amount from penalty_data where duty_person=#{name} and DATE_SUB(CURDATE(), INTERVAL 6 DAY) <= date(violation_date) order by violation_date desc limit 4")
+    @Select("select violation_date, violation_facts,penalty_amount from penalty_data where duty_person=#{name} and DATE_SUB(CURDATE(), INTERVAL 31 DAY) <= date(violation_date) order by violation_date desc limit 4")
     List<PenaltyData> selectViolationData(String name);
 
     @Select("select count(*) from user_profile_data where to_days(creat_time) = to_days(now())")

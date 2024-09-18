@@ -31,6 +31,7 @@ public class StringsUtil {
             }
         }
         sb.append("\"}");
+        System.out.println(sb);
         JSONObject options = JSONObject.parseObject(String.valueOf(sb));
         return options;
     }

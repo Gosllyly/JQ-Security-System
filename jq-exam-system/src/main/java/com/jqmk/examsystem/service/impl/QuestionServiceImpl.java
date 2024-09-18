@@ -2,7 +2,6 @@ package com.jqmk.examsystem.service.impl;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
-import com.alibaba.excel.write.style.column.SimpleColumnWidthStyleStrategy;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.OrderItem;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -127,7 +126,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 //        }
         if (examInfoSummaryMapper.selectCountWrongId(examSummary)!=0) {
             wrongList = examInfoSummaryMapper.selectWrongId(examSummary);
-            System.out.println("查出"+examInfoSummaryMapper.selectWrongId(examSummary));
+            //System.out.println("查出"+examInfoSummaryMapper.selectWrongId(examSummary));
             wrongList = wrongList+","+questionId;
             examInfoSummaryMapper.updateWrongId(wrongList,examSummary);
         }else {

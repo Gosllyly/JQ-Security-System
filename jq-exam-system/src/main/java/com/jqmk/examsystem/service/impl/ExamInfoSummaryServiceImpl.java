@@ -322,10 +322,10 @@ public class ExamInfoSummaryServiceImpl extends ServiceImpl<ExamInfoSummaryMappe
             if (json.getString(list1.get(i)).equals("")) {
                 questionMapper.addNoReply(testId);
             } else if (StringsUtil.stringRecom(daan).replaceAll("\"", "").replaceAll(",", ", ").equals(json.getString(list1.get(i)))) {
-                System.out.println("对了");
+                //System.out.println("对了");
                 questionService.addCurrent(id, testId, list1.get(i), examSummary);
             } else if (!StringsUtil.stringRecom(daan).replaceAll("\"", "").replaceAll(",", ", ").equals(json.getString(list1.get(i)))) {
-                System.out.println("错了");
+                //System.out.println("错了");
                 questionService.addWrongs(id, testId, list1.get(i), examSummary, json.getString(list1.get(i)), userId);
             }
         }

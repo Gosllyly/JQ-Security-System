@@ -49,4 +49,10 @@ public interface JQSecurityCheckMapper {
             "FROM (SELECT towelStatus,helmetStatus,capLampStatus,rescuerStatus,shoesStatus from employee_clock_history " +
             "WHERE personName = #{name} order by detectTime desc limit 0,7 ) as a) as b")
     Integer noWearCount(String name);
+
+    @Select("SELECT SUM(towelNum+helmetNum+capNum+rescurNum+shoesNum) FROM ( SELECT sum(towelStatus=-1) as towelNum," +
+            "sum(helmetStatus=-1) as helmetNum,sum(capLampStatus=-1) as capNum,sum(rescuerStatus=-1) as rescurNum,sum(shoesStatus=-1) as shoesNum " +
+            "FROM (SELECT towelStatus,helmetStatus,capLampStatus,rescuerStatus,shoesStatus from employee_clock_history " +
+            "WHERE personName = #{name} order by detectTime desc limit 0,7 ) as a) as b")
+    Integer noDetectCount(String name);
 }

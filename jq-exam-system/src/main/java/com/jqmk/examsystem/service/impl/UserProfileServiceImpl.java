@@ -98,11 +98,12 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
         List<Map<String, Object>> wearDataNum = jqSecurityCheckMapper.selectWearCount(name,employeeId);
         Integer wrongWear = jqSecurityCheckMapper.wrongWearCount(name);
         Integer noWear = jqSecurityCheckMapper.noWearCount(name);
+        Integer noDetect = jqSecurityCheckMapper.noDetectCount(name);
         Integer violationNumber = userProfileMapper.count(name,employeeId);
         Map<String, Object> result = new HashMap<>();
         result.put("violationNumber",violationNumber);//下井违规
         result.put("wearDataNum",wearDataNum);//穿戴违规
-        result.put("noWear",noWear);//未穿戴总次数
+        result.put("noWear",noWear+noDetect);//未穿戴总次数
         result.put("wrongWear",wrongWear);//穿戴不规范总次数
         return result;
     }
@@ -145,7 +146,7 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
     @Override
     public Map<String, Object> selectByName(String name) {
         String names = String.valueOf(StringsUtil.strAdd(name));
-        System.out.println(names);
+        //System.out.println(names);
         LinkedHashMap<String, Object> result = new LinkedHashMap<>();
         List<UserProfileInfoDto> lowPeople= userProfileMapper.selectByName(names,"低风险");
         result.put("low",lowPeople);
