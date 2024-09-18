@@ -66,4 +66,6 @@ public class RoleManageDto implements Serializable {
 
     private LocalDateTime updateTime;
 
+    private int authDegree;
+
 }

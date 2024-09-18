@@ -16,6 +16,7 @@ import javax.annotation.Resource;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @RestController
@@ -43,14 +44,18 @@ public class RoleManageController {
         roleManage.setDescription(roleManageDto.getDescription());
         roleManage.setIncludeJobType(roleManageDto.getIncludeJobType());
         roleManage.setIncludeDeptCodes(roleManageDto.getIncludeDeptCodes());
+        roleManage.setAuthDegree(roleManageDto.getAuthDegree());
 
         String includePeopleStr = StringsUtil.stringRecomNew(roleManageDto.getIncludePeople().toString());
         List<String> includePeopleList = Arrays.asList(includePeopleStr.split(","));
 
         roleManage.setIncludePeople(includePeopleStr);
         if (roleManageService.count(new QueryWrapper<RoleManage>().eq("role_id",roleManage.getRoleId()))==0) {
-            roleManageService.save(roleManage);
+            //先删除旧角色中的名字，保证一个名字只有一个角色
+            roleManageService.removePeopleFromOtherRoles(includePeopleList);
             userService.updateUserTable(includePeopleList, roleManage.getRoleId());
+            roleManageService.save(roleManage);
+
             return WebResult.ok().message("创建角色成功");
         }else {
             return WebResult.fail().message("角色重复!");
@@ -85,24 +90,54 @@ public class RoleManageController {
         roleManage.setDescription(roleManageDto.getDescription());
         roleManage.setIncludeJobType(roleManageDto.getIncludeJobType());
         roleManage.setIncludeDeptCodes(roleManageDto.getIncludeDeptCodes());
+        roleManage.setAuthDegree(roleManageDto.getAuthDegree());
 
         String includePeopleStr = StringsUtil.stringRecomNew(roleManageDto.getIncludePeople().toString());
         List<String> includePeopleList = Arrays.asList(includePeopleStr.split(","));
 
         roleManage.setIncludePeople(includePeopleStr);
         if (roleManageService.count(new QueryWrapper<RoleManage>().eq("role_id",roleManage.getRoleId()))!=0) {
+            // 获取数据库中的旧的角色信息，包括旧的人员名单
+            RoleManage oldRoleManage = roleManageService.getById(roleManage.getRoleId());
+            String oldIncludePeopleStr = oldRoleManage.getIncludePeople();
+            List<String> oldIncludePeopleList = Arrays.asList(oldIncludePeopleStr.split(","));
+
+            // 找出旧名单中存在，但新名单中不再包含的人员
+            List<String> peopleToRemoveRole = oldIncludePeopleList.stream()
+                    .filter(person -> !includePeopleList.contains(person))
+                    .collect(Collectors.toList());
+
+            // 对这些人员，将他们的角色更改为 "general_user"
+            if (!peopleToRemoveRole.isEmpty()) {
+                userService.updateUserTable(peopleToRemoveRole, "general_user");
+            }
+
             roleManage.setUpdateTime(LocalDateTime.now());
-            roleManageService.updateById(roleManage);
             userService.updateUserTable(includePeopleList, roleManage.getRoleId());
+            roleManageService.updateById(roleManage);
             return WebResult.ok().message("更新角色成功");
         }else {
-            return WebResult.fail().message("角色重复!");
+            return WebResult.fail().message("角色不存在!");
         }
 
     }
 
     @DeleteMapping("/delete")
-    public WebResult deleteCategory(@RequestBody RoleManage roleManage) {
+    public WebResult deleteCategory(@RequestBody RoleManage roleManagedto) {
+
+        String roleId = roleManagedto.getRoleId();
+        RoleManage roleManage = roleManageService.getOne(new QueryWrapper<RoleManage>()
+                                                          .eq("role_id", roleId.trim()));
+        //获取需要删除角色包含的用户列表
+        String includePeople = roleManage.getIncludePeople();
+        if (includePeople != null && !includePeople.isEmpty()) {
+
+            String includePeopleStr = StringsUtil.stringRecomNew(includePeople.toString());
+            List<String> includePeopleList = Arrays.asList(includePeopleStr.split(","));
+
+            // 更新这些用户的 role_id 为 "general_user"
+            userService.updateUserTable(includePeopleList,"general_user");
+        }
         roleManageService.removeById(roleManage);
         return WebResult.ok().message("删除成功");
     }

@@ -50,4 +50,8 @@ public class User implements Serializable {
     private Integer deleteFlag;
 
     private LocalDateTime createDate;
+
+    private LocalDateTime updateTime;
+
+    private int authDegree;
 }

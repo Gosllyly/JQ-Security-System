@@ -5,11 +5,16 @@ import com.jqmk.examsystem.component.TimedTask;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.service.UserService;
+import org.apache.shiro.SecurityUtils;
+import org.apache.shiro.authc.DisabledAccountException;
+import org.apache.shiro.authc.IncorrectCredentialsException;
+import org.apache.shiro.authc.UnknownAccountException;
+import org.apache.shiro.authc.UsernamePasswordToken;
+import org.apache.shiro.subject.Subject;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.net.URISyntaxException;
-import java.util.Map;
 
 /**
  * <p>
@@ -37,18 +42,34 @@ public class UserController {
      */
     @RequestMapping("/login")
     public WebResult login(@RequestParam String userName, @RequestParam String password) {
-        Map<String, Object> result = userService.login(userName, password);
-        int keyNumber = (int) result.get("code");
-        switch (keyNumber) {
-            case -1:
-                return WebResult.fail().message("用户名不存在");
-            case 0:
-                return WebResult.fail().message("密码错误");
-            case 1:
-                return WebResult.ok().data(result);
-            default:
-                return WebResult.fail().message("未知错误");
+        Subject user = SecurityUtils.getSubject();
+        UsernamePasswordToken token = new UsernamePasswordToken(userName, password);
+        try {
+            //shiro帮我们匹配密码什么的，我们只需要把东西传给它，它会根据RoleRealm里认证方法设置的来验证
+            user.login(token);
+            return WebResult.ok().data(userService.selectInfo(userName));
+        } catch (UnknownAccountException e) {
+            return WebResult.fail().message("用户名不存在");
+        } catch (DisabledAccountException e) {
+            return WebResult.fail().message("账号未启用");
+        } catch (IncorrectCredentialsException e) {
+            return WebResult.fail().message("密码错误");
+        } catch (Throwable e) {
+            return WebResult.fail().message("未知错误");
         }
+
+//        Map<String, Object> result = userService.login(userName, password);
+//        int keyNumber = (int) result.get("code");
+//        switch (keyNumber) {
+//            case -1:
+//                return WebResult.fail().message("用户名不存在");
+//            case 0:
+//                return WebResult.fail().message("密码错误");
+//            case 1:
+//                return WebResult.ok().data(result);
+//            default:
+//                return WebResult.fail().message("未知错误");
+//        }
     }
 
     @PostMapping("/register")

@@ -71,4 +71,12 @@ public interface UserMapper extends BaseMapper<User> {
             "</script>")
     void updateRoleIdByNames(@Param("names") List<String> names, @Param("roleId") String roleId);
 
+
+    @Select("SELECT u.*, r.auth_degree " +
+            "FROM user u " +
+            "JOIN role_manage r ON u.role_id = r.role_id " +
+            "WHERE u.username = #{userName}")
+    User selectUserAndRole(@Param("userName") String userName);
+
+
 }

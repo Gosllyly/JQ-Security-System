@@ -2,6 +2,7 @@ package com.jqmk.examsystem.ExamTimeoutTask;
 
 import com.jqmk.examsystem.entity.ExamInfoSummary;
 import com.jqmk.examsystem.mapper.ExamInfoSummaryMapper;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -16,6 +17,7 @@ import java.util.List;
  * @Description 每隔一个小时检查是否有超时的答卷，并强制提交
  */
 @Component
+@EnableAsync
 public class ExamTimeoutTask {
 
     @Resource

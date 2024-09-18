@@ -3,6 +3,8 @@ package com.jqmk.examsystem.service;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jqmk.examsystem.entity.RoleManage;
 
-public interface RoleManageService extends IService<RoleManage> {
+import java.util.List;
 
+public interface RoleManageService extends IService<RoleManage> {
+    public void removePeopleFromOtherRoles(List<String> includePeople);
 }

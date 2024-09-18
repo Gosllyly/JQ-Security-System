@@ -1,11 +1,12 @@
 package com.jqmk.examsystem.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
+import com.jqmk.examsystem.entity.RoleManage;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.mapper.UserMapper;
 import com.jqmk.examsystem.mapper.UserProfileMapper;
+import com.jqmk.examsystem.service.RoleManageService;
 import com.jqmk.examsystem.service.UserProfileService;
 import com.jqmk.examsystem.service.UserService;
 import com.jqmk.examsystem.utils.JwtUtil;
@@ -31,7 +32,13 @@ import java.util.Map;
 public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements UserService {
 
     @Resource
+    public UserService userService;
+    @Resource
     private UserMapper userMapper;
+
+    @Resource
+    private RoleManageService roleManageService;
+
 
     @Resource
     private UserProfileMapper userProfileMapper;
@@ -41,9 +48,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public Map<String, Object> login(String userName, String password) {
-        QueryWrapper wrapper = new QueryWrapper();
-        wrapper.eq("username",userName);
-        User user = userMapper.selectOne(wrapper);
+//        QueryWrapper wrapper = new QueryWrapper();
+//        wrapper.eq("username",userName);
+//        User user = userMapper.selectOne(wrapper);
+        User user = userMapper.selectUserAndRole(userName);
         Map<String, Object> result = new HashMap<>();
         // 当用户名不存在时，返回-1
         if (user == null) {
@@ -51,6 +59,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         // 当用户名存在且密码正确时，返回1
         if (password.equals(user.getPassword())) {
+//            String authUrls = roleManageService.getById(user.getId()).getAuthUrls();
+//            user.setAuthUrls(authUrls);
             result.put("user", user);
             result.put("code", 1);
             result.put("token", JwtUtil.generateToken(userName));
@@ -61,6 +71,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         return result;
     }
 
+    @Override
+    public Map<String, Object> selectInfo(String userName){
+        User user = userMapper.selectUserAndRole(userName);
+        Map<String, Object> result = new HashMap<>();
+        // 当用户名不存在时，返回-1
+        if (user == null) {
+            result.put("code", -1);
+            return result;
+        }
+
+        result.put("user", user);
+        result.put("code", 1);
+        result.put("token", JwtUtil.generateToken(userName));
+
+        return result;
+    }
     @Override
     public List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto) {
         if (selectPeoplesDto.getIncludeJobType()==null&&selectPeoplesDto.getTime()==null) {
@@ -107,5 +133,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public void updateUserTable(List<String> includePeopleList, String roleId) {
         userMapper.updateRoleIdByNames(includePeopleList,roleId);
     }
+
+    @Override
+    public User getByName(String name) {
+        return userMapper.selectUserAndRole(name);
+    }
+
+    @Override
+    public RoleManage getRoleByRoleId(String roleId){
+        return roleManageService.getById(roleId);
+    };
 
 }

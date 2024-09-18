@@ -2,6 +2,7 @@ package com.jqmk.examsystem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
+import com.jqmk.examsystem.entity.RoleManage;
 import com.jqmk.examsystem.entity.User;
 
 import java.util.List;
@@ -19,7 +20,14 @@ public interface UserService extends IService<User> {
 
     Map<String, Object> login(String userName, String password);
 
+    Map<String, Object> selectInfo(String userName);
+
     List<String> selectUsersByNames(SelectPeoplesDto selectPeoplesDto);
 
     void updateUserTable(List<String> includePeopleList, String roleId);
+
+    User getByName(String name);
+
+    RoleManage getRoleByRoleId(String roleId);
+
 }

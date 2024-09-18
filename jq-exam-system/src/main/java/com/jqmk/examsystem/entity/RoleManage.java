@@ -66,4 +66,7 @@ public class RoleManage implements Serializable {
 
     private LocalDateTime updateTime;
 
+    @TableField("auth_degree")
+    private int authDegree;
+
 }
