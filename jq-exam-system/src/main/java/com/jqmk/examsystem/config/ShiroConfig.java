@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import javax.servlet.Filter;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 @Configuration
 public class ShiroConfig {
@@ -31,6 +33,10 @@ public class ShiroConfig {
     public ShiroFilterFactoryBean shiroFilter(@Qualifier("defaultWebSecurityManager") DefaultWebSecurityManager manager) {
         ShiroFilterFactoryBean shiroFilterFactoryBean = new ShiroFilterFactoryBean();
         shiroFilterFactoryBean.setSecurityManager(manager);
+
+        Map<String, Filter> filters = new LinkedHashMap<>();
+        filters.put("user", new StatelessAuthcFilter());
+        shiroFilterFactoryBean.setFilters(filters);
 
         // 动态加载权限
         LinkedHashMap<String, String> filterChainDefinitionMap = new LinkedHashMap<>();
@@ -68,5 +74,6 @@ public class ShiroConfig {
     public RoleRealm roleRealm(){
         return new RoleRealm();
     }
+
 
 }
