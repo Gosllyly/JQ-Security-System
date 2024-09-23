@@ -93,6 +93,31 @@ public class UserProfileServiceImpl extends ServiceImpl<UserProfileMapper, UserP
     }
 
     @Override
+    public Map<String, Object> selectByTimeNew(String name, String time) {
+        LinkedHashMap<String, Object> result = new LinkedHashMap<>();
+        if (name!=null) {
+            String names = String.valueOf(StringsUtil.strAdd(name));
+            List<UserProfileInfoDto> lowPeople= userProfileMapper.selectLowPeopleByTimeNew1(time,names);
+            List<UserProfileInfoDto> mediumPeoples= userProfileMapper.selectMediumPeoplesByTimeNew1(time,names);
+            List<UserProfileInfoDto> intersection = (List<UserProfileInfoDto>) CollectionUtils.subtract(mediumPeoples, lowPeople);
+            result.put("low",lowPeople);
+            result.put("medium",intersection);
+            List<UserProfileInfoDto> highPeoples= userProfileMapper.selectHighPeoplesByTimeNew1(time,names);
+            result.put("high",highPeoples);
+            return result;
+        }else {
+            List<UserProfileInfoDto> lowPeople= userProfileMapper.selectLowPeopleByTimeNew(time);
+            List<UserProfileInfoDto> mediumPeoples= userProfileMapper.selectMediumPeoplesByTimeNew(time);
+            List<UserProfileInfoDto> intersection = (List<UserProfileInfoDto>) CollectionUtils.subtract(mediumPeoples, lowPeople);
+            result.put("low",lowPeople);
+            result.put("medium",intersection);
+            List<UserProfileInfoDto> highPeoples= userProfileMapper.selectHighPeoplesByTimeNew(time);
+            result.put("high",highPeoples);
+            return result;
+        }
+    }
+
+    @Override
     public Map<String, Object> violationCount(String name, String employeeId) {
         //String data = jqSecurityCheckMapper.selectData(name,employeeId);
         List<Map<String, Object>> wearDataNum = jqSecurityCheckMapper.selectWearCount(name,employeeId);

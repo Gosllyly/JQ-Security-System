@@ -43,14 +43,14 @@ public class ShiroConfig {
 //                filterChainDefinitionMap.put(url, "perms[" + role.getRoleName() + "]");
 //            }
 //        }
-        // 从配置文件加载过滤规则
-        String[] definitions = filterChainDefinitions.split("[\\r\\n;]+"); // 支持换行符和分号分隔
-        for (String definition : definitions) {
-            String[] split = definition.split("=");
-            if (split.length == 2) {
-                filterChainDefinitionMap.put(split[0].trim(), split[1].trim());
-            }
-        }
+//        // 从配置文件加载过滤规则
+//        String[] definitions = filterChainDefinitions.split("[\\r\\n;]+"); // 支持换行符和分号分隔
+//        for (String definition : definitions) {
+//            String[] split = definition.split("=");
+//            if (split.length == 2) {
+//                filterChainDefinitionMap.put(split[0].trim(), split[1].trim());
+//            }
+//        }
 
         shiroFilterFactoryBean.setFilterChainDefinitionMap(filterChainDefinitionMap);
 

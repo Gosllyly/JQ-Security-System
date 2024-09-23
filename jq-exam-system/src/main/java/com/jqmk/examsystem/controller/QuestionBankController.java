@@ -1,23 +1,17 @@
 package com.jqmk.examsystem.controller;
 
 
-import cn.hutool.core.bean.BeanUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.support.ExcelTypeEnum;
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.jqmk.examsystem.dto.ExamCategoryDto;
 import com.jqmk.examsystem.dto.ExamQuestion;
 import com.jqmk.examsystem.dto.WebResult;
-import com.jqmk.examsystem.dto.export.ExportQuestion;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.QuestionBank;
 import com.jqmk.examsystem.mapper.QuestionMapper;
 import com.jqmk.examsystem.service.QuestionBankService;
 import com.jqmk.examsystem.service.QuestionService;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,8 +19,6 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -65,14 +57,22 @@ public class QuestionBankController {
 
     @PostMapping("/createBankName")
     public WebResult addBankName(@RequestBody QuestionBank questionBank) {
-        questionBankService.save(questionBank);
-        return WebResult.ok().message("创建题库成功");
+        if (questionMapper.countBank(questionBank.getBankName())==0) {
+            questionBankService.save(questionBank);
+            return WebResult.ok().message("创建题库成功");
+        }else {
+            return WebResult.fail().message("题库名称重复");
+        }
     }
 
     @PostMapping("/updateBankName")
     public WebResult updateBankName(@RequestBody QuestionBank questionBank) {
-        questionBankService.updateById(questionBank);
-        return WebResult.ok().message("更新题库名称成功");
+        if (questionMapper.countBank(questionBank.getBankName())==0) {
+            questionBankService.updateById(questionBank);
+            return WebResult.ok().message("更新题库名称成功");
+        }else {
+            return WebResult.fail().message("题库名称重复");
+        }
     }
 
     @DeleteMapping("/deleteBankName")

@@ -2,6 +2,7 @@ package com.jqmk.examsystem.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
+import com.jqmk.examsystem.dto.UserRoleDto;
 import com.jqmk.examsystem.entity.RoleManage;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.mapper.UserMapper;
@@ -51,7 +52,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 //        QueryWrapper wrapper = new QueryWrapper();
 //        wrapper.eq("username",userName);
 //        User user = userMapper.selectOne(wrapper);
-        User user = userMapper.selectUserAndRole(userName);
+        UserRoleDto user = userMapper.selectUserAndRole(userName);
         Map<String, Object> result = new HashMap<>();
         // 当用户名不存在时，返回-1
         if (user == null) {
@@ -73,7 +74,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public Map<String, Object> selectInfo(String userName){
-        User user = userMapper.selectUserAndRole(userName);
+        UserRoleDto user = userMapper.selectUserAndRole(userName);
         Map<String, Object> result = new HashMap<>();
         // 当用户名不存在时，返回-1
         if (user == null) {
@@ -135,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public User getByName(String name) {
+    public UserRoleDto getByName(String name) {
         return userMapper.selectUserAndRole(name);
     }
 

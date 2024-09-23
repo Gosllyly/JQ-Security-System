@@ -118,6 +118,9 @@ public interface QuestionMapper extends BaseMapper<Question> {
     @Select("SELECT COUNT(*) as amount,SUM(type=1) as radio,SUM(type=2) as multiple,SUM(type=3) as judge from question WHERE `status`=0")
     Map<String, Object> countQuestion();
 
+    @Select("SELECT COUNT(*)  from question_bank WHERE bank_name=#{bankName} and status=0")
+    Integer countBank(String bankName);
+
     @Update("UPDATE `question` SET `status` = 0 WHERE id in (${idData})")
     void restoreQuestion(String idData);
 

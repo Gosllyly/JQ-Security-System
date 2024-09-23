@@ -1,5 +1,6 @@
 package com.jqmk.examsystem.realm;
 
+import com.jqmk.examsystem.dto.UserRoleDto;
 import com.jqmk.examsystem.entity.RoleManage;
 import com.jqmk.examsystem.entity.User;
 import com.jqmk.examsystem.service.UserService;
@@ -24,7 +25,7 @@ public class RoleRealm extends AuthorizingRealm {
     protected AuthenticationInfo doGetAuthenticationInfo(AuthenticationToken authenticationToken) throws AuthenticationException {
         System.out.println("dddddddddddddddddddddd:" + authenticationToken);
         UsernamePasswordToken token = (UsernamePasswordToken) authenticationToken;
-        User user = userService.getByName(token.getUsername());
+        UserRoleDto user = userService.getByName(token.getUsername());
         if(user != null){
             System.out.println("--------用户：" + user.getUsername());
             return new SimpleAuthenticationInfo(user,user.getPassword(),getName());
@@ -35,7 +36,7 @@ public class RoleRealm extends AuthorizingRealm {
 
     /**
      * 授权
-     * @param principalCollection
+     * @param
      * @return
      */
     @Override
@@ -46,7 +47,7 @@ public class RoleRealm extends AuthorizingRealm {
         System.out.println("角色名：：：：：" + user0.getRoleId());
 
         // 从数据库获取用户信息
-        User user = userService.getByName(username);
+        UserRoleDto user = userService.getByName(username);
 
         // 创建AuthorizationInfo对象
         SimpleAuthorizationInfo authorizationInfo = new SimpleAuthorizationInfo();

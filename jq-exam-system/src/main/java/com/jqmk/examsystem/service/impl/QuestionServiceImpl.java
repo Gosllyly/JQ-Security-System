@@ -82,7 +82,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     public Page selectBankByPage(Integer questionBankId, Long page, Long pageSize) {
         Page<Question> questionPage = new Page<>(page,pageSize);
         questionPage.addOrder(new OrderItem("update_time",false));
-        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("question_bank_id",questionBankId).eq("status",0)).getRecords());
+        Page records =  questionPage.setRecords(questionMapper.selectPage(questionPage,new QueryWrapper<Question>().eq("question_bank_id",questionBankId).eq("status",0).groupBy("stem","type")).getRecords());
         return records;
     }
 

@@ -1,6 +1,16 @@
 package com.jqmk.examsystem.utils;
 
-import com.alibaba.fastjson.JSONObject;
+
+
+import com.alibaba.fastjson.JSON;
+
+import org.json.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,26 +24,33 @@ import java.util.List;
  */
 public class StringsUtil {
 
-    public static JSONObject strToJson(String str) {
-        String newStr = str.replace("、", "\":\"");
-        String newStr1 = newStr.replace("\n", "\",\"");
+    public static String strToJson(String str)  {
+        String newStrA = str.replace("A、", "A\": \"");
+        String newStrB = newStrA.replace("B、", "B\": \"");
+        String newStrC = newStrB.replace("C、", "C\": \"");
+        String newStrD = newStrC.replace("D、", "D\": \"");
+        String newStr = newStrD.replace("E、", "E\": \"");
+        String newStr1 = newStr.replace("\n", "\", \"");
         List<String> list = new ArrayList<>(Arrays.asList(newStr1));
+        list.toString();
+        String newStr2 = list.toString().replace("[", "{\"");
+        String newStr3 = newStr2.replace("]", "\"}");
 
         /**  用StringBuilder作字符串拼接  */
-        StringBuilder sb = new StringBuilder();
-        sb.append("{\"");
-        int seq = 1;
-        for (String s : list) {
-
-            sb.append(s);
-            if (seq++ != list.size()){
-                sb.append("、");
-            }
-        }
-        sb.append("\"}");
-        System.out.println(sb);
-        JSONObject options = JSONObject.parseObject(String.valueOf(sb));
-        return options;
+//        StringBuilder sb = new StringBuilder();
+//        sb.append("{\"");
+//        int seq = 1;
+//        for (String s : list) {
+//            if (seq++ != list.size()){
+//                sb.append("、");
+//            }
+//        }
+//        sb.append("\"}");
+//        System.out.println("==="+sb);
+//        JSONObject jsonObject = new JSONObject(sb);
+//        System.out.println(jsonObject);
+        //JSONObject options = JSON.parseObject(json);
+        return newStr3;
     }
     public static String arrayToString(String str) {
         if (str!=null) {

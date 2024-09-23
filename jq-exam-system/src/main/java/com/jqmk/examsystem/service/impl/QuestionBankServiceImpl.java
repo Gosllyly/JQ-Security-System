@@ -1,8 +1,8 @@
 package com.jqmk.examsystem.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jqmk.examsystem.dto.QuestionAdd;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.QuestionBank;
@@ -18,6 +18,7 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -78,19 +79,19 @@ public class QuestionBankServiceImpl extends ServiceImpl<QuestionBankMapper, Que
             Integer type = conventType(row.getCell(0).getStringCellValue());
             String stem = row.getCell(1).getStringCellValue();
             String optionsStr = row.getCell(2).getStringCellValue();
-            JSONObject options = StringsUtil.strToJson(optionsStr);
+            String options = StringsUtil.strToJson(optionsStr);
             String correctOptions = StringsUtil.stringCut(row.getCell(3).getStringCellValue());
             String analysis = row.getCell(4).getStringCellValue();
             Integer status = conventStatus(row.getCell(5).getStringCellValue());
 
             // 拼接题目和选项
-            String combined = stem  + options.toJSONString();
-
-            // 检查题目是否已经存在（使用缓存）
-            if (existingQuestions.contains(combined)) {
-                skippedCount++;
-                continue;
-            }
+//            String combined = stem  + options.toJSONString();
+//
+//                // 检查题目是否已经存在（使用缓存）
+//                if (existingQuestions.contains(combined)) {
+//                    skippedCount++;
+//                    continue;
+//            }
 
             QuestionAdd question = new QuestionAdd();
             question.setType(type);

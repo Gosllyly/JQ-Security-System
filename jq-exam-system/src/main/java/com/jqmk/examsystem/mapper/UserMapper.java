@@ -1,8 +1,10 @@
 package com.jqmk.examsystem.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.jqmk.examsystem.dto.UserRoleDto;
 import com.jqmk.examsystem.entity.User;
 import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -76,7 +78,7 @@ public interface UserMapper extends BaseMapper<User> {
             "FROM user u " +
             "JOIN role_manage r ON u.role_id = r.role_id " +
             "WHERE u.username = #{userName}")
-    User selectUserAndRole(@Param("userName") String userName);
+    UserRoleDto selectUserAndRole(@Param("userName") String userName);
 
 
 }

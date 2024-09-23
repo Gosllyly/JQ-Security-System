@@ -1,6 +1,7 @@
 package com.jqmk.examsystem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jqmk.examsystem.entity.Question;
 import com.jqmk.examsystem.entity.QuestionBank;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -18,7 +19,7 @@ import java.util.List;
  */
 public interface QuestionBankService extends IService<QuestionBank> {
 
-    void importData(MultipartFile file,Integer questionBankId);
+    void importData(MultipartFile file,Integer questionBankId) throws JsonProcessingException;
 
     List<Question> exportQuestionBank(Integer questionBankId);
 

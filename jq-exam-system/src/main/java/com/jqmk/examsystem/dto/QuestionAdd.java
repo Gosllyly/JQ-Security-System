@@ -1,9 +1,10 @@
 package com.jqmk.examsystem.dto;
 
-import com.alibaba.fastjson.JSONObject;
+
 import com.baomidou.mybatisplus.annotation.*;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.Data;
+import org.json.JSONObject;
 
 import java.io.Serializable;
 
@@ -32,8 +33,7 @@ public class QuestionAdd implements Serializable {
     /**
      * 选项，使用 json 表示，举例: {"A":"XXXXX","B":"YYYYY"}
      */
-    @TableField(typeHandler = JacksonTypeHandler.class)
-    private JSONObject options;
+    private String options;
 
     /**
      * 正确答案，使用 json 数组表示，举例：["A","B"]

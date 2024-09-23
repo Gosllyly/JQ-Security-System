@@ -75,8 +75,8 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT count(*) FROM `user_profile_data` where date_format(creat_time,'%Y-%m-%d')=#{creatTime} and level!='null' ")
     Integer countWithTime(String creatTime);
 
-    @Select("select distinct username,employee_id from `user_profile_data` where username=#{name} ")
-    List<UserProfileInfoDto> selectByName(String name);
+//    @Select("select distinct username,employee_id from `user_profile_data` where username=#{name} ")
+//    List<UserProfileInfoDto> selectByName(String name);
 
     @Select("SELECT DISTINCT(up.username),up.level,up.creat_time,user.employee_id as employeeId,`user`.card_no as cardNo,user.dept_name as deptName,`user`.job_type as jobType,user.img_file as imgFile " +
             "FROM `user_profile_data` as up,`user` where up.username=user.username and `user`.username=#{name} and user.employee_id=#{employeeId} " +
@@ -168,8 +168,8 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     List<Map<String, Object>> violationData(String time,String deptName);
 
 
-    @Select("SELECT * FROM (SELECT `rank`,username, employee_id,level FROM ( SELECT username, score,employee_id,level,creat_time, " +
-            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` FROM user_profile_data_dispose where  username in (${names}) and level!='null' and level=#{type} ) AS ranked_table ) as a")
+    @Select("SELECT `rank`,username, employee_id,level FROM ( SELECT username, score,employee_id,level,creat_time, " +
+            "ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` FROM user_profile_data_dispose where  username in (${names}) and level!='null' and level=#{type} ) AS ranked_table ")
     List<UserProfileInfoDto> selectByName(String names,String type);
 
     @Select("SELECT any_value(username) as username,any_value(`level`) as level,any_value(employee_id) as employeeId,any_value(creat_time) " +
@@ -200,6 +200,30 @@ public interface UserProfileMapper extends BaseMapper<UserProfileInfo> {
     @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
             "FROM user_profile_data where `level`='高风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='高风险' ) as a")
     List<String> selectHighPeoplesByTime(String time);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='低风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='低风险' ) as a")
+    List<UserProfileInfoDto> selectLowPeopleByTimeNew(String time);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='中风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='中风险' ) as a")
+    List<UserProfileInfoDto> selectMediumPeoplesByTimeNew(String time);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='高风险' and (#{time} IS NULL OR DATE(creat_time)>=#{time}) GROUP BY username) AS ranked_table WHERE  `level`='高风险' ) as a")
+    List<UserProfileInfoDto> selectHighPeoplesByTimeNew(String time);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='低风险' and DATE(creat_time)>=#{time} and username in (${names}) GROUP BY username) AS ranked_table WHERE  `level`='低风险' ) as a")
+    List<UserProfileInfoDto> selectLowPeopleByTimeNew1(String time,String names);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='中风险' and  DATE(creat_time)>=#{time} and username in (${names}) GROUP BY username) AS ranked_table WHERE  `level`='中风险' ) as a")
+    List<UserProfileInfoDto> selectMediumPeoplesByTimeNew1(String time,String names);
+
+    @Select("SELECT * FROM (SELECT username,`rank`,employee_id,level FROM (SELECT username, score,employee_id,level,creat_time,ROW_NUMBER() OVER (ORDER BY score DESC) AS `rank` " +
+            "FROM user_profile_data where `level`='高风险' and DATE(creat_time)>=#{time} and username in (${names}) GROUP BY username) AS ranked_table WHERE  `level`='高风险' ) as a")
+    List<UserProfileInfoDto> selectHighPeoplesByTimeNew1(String time,String names);
 
     @Select("SELECT violation_type as type,COUNT(id) as number FROM penalty_data WHERE violation_date=#{time} GROUP BY violation_type")
     List<Map<String, Object>> violationPie(String time);

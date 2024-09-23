@@ -47,5 +47,7 @@ public interface UserProfileService extends IService<UserProfileInfo> {
 
     Map<String, Object> selectByName(String name);
 
-    Map<String, Object> selectByTime(String time);
+    Map<String, Object> selectByTime(String name);
+
+    Map<String, Object> selectByTimeNew(String name,String time);
 }

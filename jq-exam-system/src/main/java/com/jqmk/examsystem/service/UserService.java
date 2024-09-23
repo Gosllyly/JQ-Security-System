@@ -2,6 +2,7 @@ package com.jqmk.examsystem.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
+import com.jqmk.examsystem.dto.UserRoleDto;
 import com.jqmk.examsystem.entity.RoleManage;
 import com.jqmk.examsystem.entity.User;
 
@@ -26,7 +27,7 @@ public interface UserService extends IService<User> {
 
     void updateUserTable(List<String> includePeopleList, String roleId);
 
-    User getByName(String name);
+    UserRoleDto getByName(String name);
 
     RoleManage getRoleByRoleId(String roleId);
 

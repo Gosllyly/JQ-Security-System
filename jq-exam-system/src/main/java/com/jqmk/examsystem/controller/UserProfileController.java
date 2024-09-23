@@ -1,6 +1,7 @@
 package com.jqmk.examsystem.controller;
 
 
+import com.jqmk.examsystem.dto.RiskPeoplesDto;
 import com.jqmk.examsystem.dto.SelectPeoplesDto;
 import com.jqmk.examsystem.dto.WebResult;
 import com.jqmk.examsystem.dto.userProfile.UserProfileSelectDto;
@@ -64,9 +65,9 @@ public class UserProfileController {
         return WebResult.ok().data(userProfileService.viewMain());
     }
 
-    @GetMapping("selectByTime")
-    public WebResult selectByTime(String time) {
-        return WebResult.ok().data(userProfileService.selectByTime(time));
+    @PostMapping("selectByTime")
+    public WebResult selectByTime(@RequestBody RiskPeoplesDto riskPeoplesDto) {
+        return WebResult.ok().data(userProfileService.selectByTimeNew(riskPeoplesDto.getName(),riskPeoplesDto.getTime()));
     }
 
     @PostMapping("select")
